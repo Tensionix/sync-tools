@@ -10,8 +10,9 @@
 
 **Version 2.0.0** · 2026-10-11 · 148.2 MB
 
-- [Direct download](https://audion.dev/get/sync-tools/2.0.0/Audion_Sync_Tools_v2.0.0_Full.zip) — unmetered, no rate limits
+- [Direct download](https://dl.audion.dev/sync-tools/2.0.0/Audion_Sync_Tools_v2.0.0_Full.zip) — unmetered, no rate limits
 - [Project page](https://audion.dev/downloads/sync-tools) — every version and how to install
+- [GitHub release](https://github.com/Tensionix/sync-tools/releases/tag/v2.0.0)
 
 <p align="center"><img src="Docs/screenshot.png" alt="The program window" width="560"></p>
 
