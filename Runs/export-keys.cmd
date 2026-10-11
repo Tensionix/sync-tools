@@ -1,0 +1,39 @@
+@echo off
+rem Collects this machine's keys into <data>\Tunnel\Export, ready to travel
+rem with the data folder to another machine:
+rem   %USERPROFILE%\.ssh key pairs and config -> Tunnel\Export\SSH
+rem   this project's R2 keys                  -> Tunnel\Export\rclone
+rem
+rem The golden copy Tunnel\SSH is left alone. Import with import-keys.cmd.
+rem
+rem   export-keys.cmd          - collect what is not in Export Keys yet
+rem   export-keys.cmd -Check   - show what would be taken, change nothing
+rem   export-keys.cmd -Force   - overwrite what Export Keys already holds
+rem
+rem Comments are ASCII on purpose - cmd reads .cmd files in the OEM codepage
+rem and chokes on UTF-8 text before chcp has a chance to run.
+
+chcp 65001 >nul
+setlocal
+
+set "SCRIPT=%~dp0..\Engine\Scripts\Export-AudionKeys.ps1"
+
+rem The PowerShell the program carries: no PowerShell of the system takes part.
+set "PS=%~dp0..\App\AudionPs.exe"
+if not exist "%PS%" (
+    echo [ERROR] App\AudionPs.exe is missing. Unpack the program whole, or build it: builder_main.cmd build_app
+    exit /b 1
+)
+"%PS%" -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" %*
+
+set "RC=%ERRORLEVEL%"
+
+rem -NoPause: a background run has no keyboard, so the pause is skipped.
+rem Without the switch it stays - a window opened by double click must not vanish.
+set "NOPAUSE="
+for %%A in (%*) do if /I "%%~A"=="-NoPause" set "NOPAUSE=1"
+if defined NOPAUSE exit /b %RC%
+
+echo.
+pause
+exit /b %RC%

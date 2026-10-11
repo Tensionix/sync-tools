@@ -1,0 +1,55 @@
+{
+  "_comment": "Что зеркало забирает с MAIN VPS и куда кладёт. Порядок в списке - порядок обновления. folder - папка внутри папки данных. from: snapshot - берётся из ночного снимка корзины, server - тянется прямо с MAIN VPS по ssh. part - имя части снимка, path - путь на MAIN VPS. subdir - что взять из распакованного, если нужна не вся часть. pick - собрать плоско только эти ветки (остальное в снимке остаётся). skip - расширения, которые не переносим даже из выбранных веток. mirror=true - равнять папку с источником, удаляя лишнее: так нужно только репозиториям, остальные папки богаче своего источника. note - строка, которую окно показывает в плане.",
+
+  "_note_en": "What the mirror takes from MAIN VPS and where it puts it. The order here is the update order. from: snapshot or server; part or path accordingly; host names SECOND VPS when the source is not on MAIN VPS; subdir picks a branch out of the unpacked part; pick collects only these branches, flat; skip drops files by extension; mirror=true levels the folder with its source.",
+
+  "sources": [
+    {
+      "folder": "MAIN VPS Backup",
+      "from": "snapshot",
+      "part": "server-config.tar.gz",
+      "pick": [ "usr/local/bin", "etc/systemd/system", "etc/audion" ],
+      "skip": [ "key", "pem", "token", "credentials", "env" ],
+      "note": "MAIN VPS units, scripts and documents; keys are not taken from the snapshot"
+    },
+    {
+      "folder": "Forgejo Mirror",
+      "from": "snapshot",
+      "part": "git-forgejo.tar.gz",
+      "subdir": "repos/audion",
+      "mirror": true,
+      "note": "bare repositories from repos/audion"
+    },
+    {
+      "folder": "Audion Portal",
+      "from": "snapshot",
+      "part": "audion-portal.tar.gz",
+      "note": "the portal as it lies in /opt"
+    },
+    {
+      "folder": "Audion Vault Portal",
+      "from": "snapshot",
+      "part": "audion-vault-portal.tar.gz",
+      "note": "the worker, the deploy and both READMEs"
+    },
+    {
+      "folder": "Planning Signals",
+      "from": "server",
+      "path": "/opt/planning-signals",
+      "note": "the code is not in the snapshot: it lives in Forgejo and on MAIN VPS"
+    },
+    {
+      "folder": "Audion Share",
+      "from": "server",
+      "path": "/opt/audion-share",
+      "note": "the shelf worker"
+    },
+    {
+      "folder": "SECOND VPS Tunnel Config",
+      "from": "server",
+      "host": "second-vps",
+      "path": "/etc/wireguard",
+      "note": "SECOND VPS's own legs: private keys inside, without them a reinstalled SECOND VPS silences every beacon and router at once"
+    }
+  ]
+}

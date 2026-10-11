@@ -1,0 +1,213 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:AudionSyncTools.Views"
+        x:Class="AudionSyncTools.MainWindow"
+        Title="Audion Sync Tools"
+        Width="1400" Height="776" MinWidth="900" MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        Foreground="{DynamicResource TextMain}"
+        FontFamily="{DynamicResource FontUi}"
+        Icon="/Assets/app.ico"
+        FontSize="{DynamicResource FontBase}">
+
+    <Panel>
+    <!-- The window colour lies under everything. With a Windows 11 backdrop it turns see-through,
+         or - "only the file panels" - stays solid with holes cut where the file lists are
+         (MainWindow.Look: UpdateGlass). -->
+    <Border x:Name="ChromeBg" Background="{DynamicResource AppBg}" IsHitTestVisible="False"/>
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto" Margin="10">
+
+        <!-- Top: the program and its data folder on the left, what the probe saw in the middle,
+             the look on the right. -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="2,0,0,6">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="0,0,0,3">
+                <TextBlock x:Name="VersionText" Classes="caption"/>
+                <Button x:Name="DataBadge" Classes="small" Margin="0" ToolTip.Tip="Папка данных этой машины: ключи, адреса, конфиги и зеркала лежат в ней, а не в программе. Нажатие открывает её в проводнике; выбрать другую - SETTINGS → ПАПКА ДАННЫХ."/>
+            </StackPanel>
+            <!-- What the probe saw last, one dark badge in the middle: every road with its time and the road taken. -->
+            <Border Grid.Column="1" x:Name="ProbeBadge" Classes="probe" HorizontalAlignment="Center" Margin="14,0,14,3"
+                    ToolTip.Tip="Проба: стук в TCP-порт 22 машин и обоих VPS. Время - до ближайшего узла маршрута; молчащий маршрут АВТО обходит. Запустить заново: TUNNEL → NET → PORT 22 TCP PING или СОСТОЯНИЕ.">
+                <TextBlock x:Name="ProbeText" Classes="caption" TextTrimming="CharacterEllipsis"/>
+            </Border>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Transfers at once: rclone's own counter, halved or doubled. -->
+                <TextBlock Classes="caption" Text="ПОТОКИ" Margin="0,0,6,3"/>
+                <Button x:Name="StreamsDown" Classes="tool" ToolTip.Tip="Вдвое меньше одновременных передач: медленному каналу легче.">
+                    <Path Classes="icon" Tag="minus"/>
+                </Button>
+                <TextBlock x:Name="StreamsValue" Classes="caption" MinWidth="18" TextAlignment="Center" Margin="0,0,4,3"/>
+                <Button x:Name="StreamsUp" Classes="tool" Margin="0,0,12,3" ToolTip.Tip="Вдвое больше одновременных передач: быстрому каналу и множеству мелких файлов.">
+                    <Path Classes="icon" Tag="plus"/>
+                </Button>
+                <Button x:Name="LangButton" Classes="small" Margin="0,0,12,3" ToolTip.Tip="Язык интерфейса: RU, EN."/>
+                <ToggleButton x:Name="ThemeButton" Classes="switch icon" Margin="0,0,0,3" ToolTip.Tip="Тема: Audion Vault Dark (по умолчанию), Audion Dark, Audion Code Dark или Audion Light.">
+                    <Path Classes="icon" Tag="sun"/>
+                    <ToggleButton.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuItem x:Name="ThemeVault" Header="Audion Vault Dark" ToggleType="Radio"/>
+                            <MenuItem x:Name="ThemeDark" Header="Audion Dark" ToggleType="Radio"/>
+                            <MenuItem x:Name="ThemeCode" Header="Audion Code Dark" ToggleType="Radio"/>
+                            <MenuItem x:Name="ThemeLight" Header="Audion Light" ToggleType="Radio"/>
+                        </MenuFlyout>
+                    </ToggleButton.Flyout>
+                </ToggleButton>
+            </StackPanel>
+        </Grid>
+
+        <!-- The switch of the sections, each a row of big buttons over the same panels - the head of
+             Sync Tools 1.19 - and, apart from it at the right edge, the route to the machines: the probe
+             decides (АВТО) or the owner does. -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" Margin="2,0,0,6">
+            <StackPanel Grid.Column="0" x:Name="SectionRow" Orientation="Horizontal" VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="1" x:Name="RouteRow" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="16,0,0,3">
+                <TextBlock Classes="caption" Text="МАРШРУТ" Margin="0,0,8,0"/>
+                <ToggleButton x:Name="RouteAuto" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="АВТО" ToolTip.Tip="Маршрут выбирает проба: дома - по домашней сети, издалека - через MAIN VPS по имени, затем поверх cloudflared, затем через SECOND VPS."/>
+                <ToggleButton x:Name="RouteHome" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="LAN" ToolTip.Tip="Всегда напрямую, по адресу машины в её сети."/>
+                <ToggleButton x:Name="RouteDirect" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="SSH MAIN VPS" ToolTip.Tip="Всегда прыжком через MAIN VPS по его прямому имени."/>
+                <ToggleButton x:Name="RouteCf" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="SSH MAIN VPS CF" ToolTip.Tip="Всегда прыжком через MAIN VPS поверх cloudflared: открытого порта у него нет, и блокировать нечего."/>
+                <ToggleButton x:Name="RouteVia" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="SSH SECOND VPS" ToolTip.Tip="Всегда прыжком через SECOND VPS. Чувствительное этим маршрутом не возят."/>
+            </StackPanel>
+        </Grid>
+
+        <!-- The buttons of the section, in groups; built from config\bars.json. -->
+        <Border Grid.Row="2" x:Name="BarFrame" Classes="card" Padding="10,8,10,2" Margin="0,0,0,8">
+            <views:FlowRow x:Name="Bar" CenterLines="True"/>
+        </Border>
+
+        <Grid Grid.Row="3" x:Name="PanelsHost" ColumnDefinitions="*,34,*,9,0.5*">
+            <views:FilePanel Grid.Column="0" x:Name="LeftPanel"/>
+            <GridSplitter Grid.Column="1" x:Name="MidSplitter" ResizeDirection="Columns"/>
+            <!-- The strip between the panels, as in Audion Disk Tools and the vertical bar of Total
+                 Commander: what is done to the active panel. Above a panel only what it shows is left -
+                 its sources. In the middle of the height; the splitter still drags by the free space. -->
+            <ScrollViewer Grid.Column="1" x:Name="MidScroll" VerticalAlignment="Center" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
+                <StackPanel x:Name="MidBar" HorizontalAlignment="Center" Spacing="3">
+                    <Button x:Name="MidUp" Classes="tool mid" ToolTip.Tip="На уровень выше в активной панели (Backspace).">
+                        <Path Classes="icon" Tag="arrow-up"/>
+                    </Button>
+                    <Button x:Name="MidReload" Classes="tool mid" ToolTip.Tip="Перечитать активную панель (Ctrl+R).">
+                        <Path Classes="icon" Tag="rotate-cw"/>
+                    </Button>
+                    <Border Classes="midsep"/>
+                    <Button x:Name="MidMask" Classes="tool mid"
+                            ToolTip.Tip="Отметить строки активной панели по маскам: *.docx, pdf, 2026-*, несколько через запятую. Там же свои наборы, время изменения и группы расширений.">
+                        <Path Classes="icon" Tag="asterisk"/>
+                        <!-- The window of the mark is built and shown by MainWindow.Masks.cs: over the panels, almost as wide as the window. -->
+                    </Button>
+                    <Button x:Name="MidSearch" Classes="tool mid" ToolTip.Tip="Поиск файлов от папки активной панели вглубь (Ctrl+F, Alt+F7): по имени, группам расширений и времени. Найденное открывается в панели.">
+                        <Path Classes="icon" Tag="search"/>
+                    </Button>
+                    <Border Classes="midsep"/>
+                    <Button x:Name="MidSwap" Classes="tool mid" ToolTip.Tip="Поменять панели местами (Ctrl+U): источники и папки.">
+                        <Path Classes="icon" Tag="arrow-left-right"/>
+                    </Button>
+                    <Border Classes="midsep"/>
+                    <Button x:Name="PinButton" Classes="tool mid" ToolTip.Tip="Закрепить раздел: при следующем запуске окно откроется на нём.">
+                        <Path Classes="icon" Tag="pin"/>
+                    </Button>
+                    <Button x:Name="MidRoutes" Classes="tool mid" ToolTip.Tip="Маршруты по машинам: у каждой машины свой. До BASE может доходить домашняя сеть, а до машины в другой сети - нет, и общий выбор тогда ломает одну из них.">
+                        <Path Classes="icon" Tag="network"/>
+                    </Button>
+                    <Button x:Name="MidPower" Classes="tool mid" ToolTip.Tip="Питание WG-туннеля до роутера BASE: нажатие включает, повторное выключает. С зажатым Ctrl туннель поднимается вопреки пересечению сетей.">
+                        <Path Classes="icon" Tag="power"/>
+                    </Button>
+                    <Border Classes="midsep"/>
+                    <Button x:Name="MidNames" Classes="tool mid" ToolTip.Tip="Имена отмеченного в активной панели (или строки под курсором) в буфер обмена: по одному на строку.">
+                        <Path Classes="icon" Tag="letter-text"/>
+                    </Button>
+                    <Button x:Name="MidPaths" Classes="tool mid" ToolTip.Tip="Полные адреса отмеченного в активной панели (или строки под курсором) в буфер обмена: по одному на строку, как их понимает rclone.">
+                        <Path Classes="icon" Tag="route"/>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+            <views:FilePanel Grid.Column="2" x:Name="RightPanel"/>
+            <!-- SETTINGS in place of the panels, as in Audion Disk Tools; the journal stays beside it. -->
+            <Border Grid.Column="0" Grid.ColumnSpan="3" x:Name="SettingsHost" Classes="frame" IsVisible="False">
+                <Panel>
+                    <ScrollViewer Margin="22,18,10,14">
+                        <StackPanel x:Name="SettingsBody" Spacing="6" MaxWidth="1120" Margin="0,0,14,0"/>
+                    </ScrollViewer>
+                    <Button x:Name="SettingsClose" Classes="small" HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,10,12,0" Padding="9,2" ToolTip.Tip="Закрыть раздел (Esc).">
+                        <Path Classes="icon" Tag="x"/>
+                    </Button>
+                </Panel>
+            </Border>
+            <GridSplitter Grid.Column="3" ResizeDirection="Columns"/>
+            <!-- The journal: what the scripts and rclone say, coloured by what a line means. -->
+            <Border Grid.Column="4" Classes="frame">
+                <Grid RowDefinitions="Auto,*" Margin="8">
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                        <TextBlock Grid.Column="0" Classes="caption" Text="ЖУРНАЛ"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button x:Name="CopyLogButton" Classes="small" Content="КОПИРОВАТЬ" ToolTip.Tip="Журнал из панели - в буфер обмена. Всё с начала дня - в файле logs."/>
+                            <Button x:Name="ClearLogButton" Classes="small" Content="ОЧИСТИТЬ" Margin="0" ToolTip.Tip="Очистить панель журнала. Файл журнала в logs остаётся."/>
+                        </StackPanel>
+                    </Grid>
+                    <Border Grid.Row="1" Classes="listbg"/>
+                    <ScrollViewer Grid.Row="1" x:Name="LogScroll" HorizontalScrollBarVisibility="Disabled">
+                        <SelectableTextBlock x:Name="LogBox" TextWrapping="Wrap" Margin="8,6" FontFamily="{DynamicResource FontGrid}"
+                                             FontSize="{DynamicResource FontLog}" Foreground="{DynamicResource LogPlain}"/>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- The whole job on one bar, the status beside СТОП. -->
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto,Auto" Margin="2,6,0,0">
+            <Panel Grid.Column="0">
+                <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Height="6" IsVisible="False" VerticalAlignment="Bottom"/>
+                <TextBlock x:Name="StatusText" Classes="status" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,0,9"/>
+            </Panel>
+            <Button Grid.Column="1" x:Name="RefreshButton" Classes="small" Content="СОСТОЯНИЕ" Margin="8,0,4,0"
+                    ToolTip.Tip="Перечитать обе панели и состояние служб."/>
+            <Button Grid.Column="2" x:Name="StopButton" Classes="warn small" Content="СТОП" Margin="0" IsEnabled="False"
+                    ToolTip.Tip="Остановить текущую операцию и очистить очередь."/>
+        </Grid>
+
+        <Grid Grid.Row="5" Margin="0,6,0,0">
+            <views:FlowRow x:Name="ActionRow" CenterLines="True" LineSpacing="6">
+                <Button x:Name="RenameButton" ToolTip.Tip="Переименовать объект под курсором в активной панели. Работает и для папок.">
+                    <StackPanel><TextBlock Text="F2 ПЕРЕИМЕНОВАТЬ" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="в активной панели"/></StackPanel>
+                </Button>
+                <Button x:Name="ShareLinkButton" ToolTip.Tip="Публичные ссылки на отмеченные файлы R2 - в буфер обмена, по одной на строку.">
+                    <StackPanel><TextBlock Text="F3 ССЫЛКА" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="ссылки → буфер"/></StackPanel>
+                </Button>
+                <Button x:Name="EditButton" ToolTip.Tip="Открыть файл под курсором в редакторе. Редактор выбирается в SETTINGS: Microsoft Edit, micro, Блокнот или свой.">
+                    <StackPanel><TextBlock Text="F4 ПРАВКА" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="в редакторе"/></StackPanel>
+                </Button>
+                <Button x:Name="CopyButton" Classes="run rimonly" ToolTip.Tip="Положить отмеченное в очередь на копирование в противоположную панель. Приёмник запоминается в момент нажатия.">
+                    <StackPanel><TextBlock Text="F5 КОПИРОВАТЬ" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="в соседнюю панель"/></StackPanel>
+                </Button>
+                <Button x:Name="MoveButton" ToolTip.Tip="То же, но с удалением источника после успешной передачи.">
+                    <StackPanel><TextBlock Text="F6 ПЕРЕНЕСТИ" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="в соседнюю панель"/></StackPanel>
+                </Button>
+                <Button x:Name="MkdirButton" ToolTip.Tip="Создать папку в активной панели.">
+                    <StackPanel><TextBlock Text="F7 ПАПКА" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="в активной панели"/></StackPanel>
+                </Button>
+                <Button x:Name="DeleteButton" Classes="danger rimonly" ToolTip.Tip="Удалить отмеченное (или объект под курсором) в активной панели. Спрашивает перед удалением.">
+                    <StackPanel><TextBlock Text="F8 УДАЛИТЬ" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="в активной панели"/></StackPanel>
+                </Button>
+                <Border Width="14"/>
+                <Button x:Name="SyncCopyButton" Classes="run rimonly" ToolTip.Tip="Долить в противоположную панель всё, чего там нет или что старее. Ничего не удаляет.">
+                    <StackPanel><TextBlock Text="F11 COPY →" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="только новое"/></StackPanel>
+                </Button>
+                <Button x:Name="SyncMirrorButton" Classes="warn rimonly" ToolTip.Tip="Сделать приёмник точной копией источника: лишнее в приёмнике удаляется. Перед запуском показывает, что именно.">
+                    <StackPanel><TextBlock Text="F12 SYNC →" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="точная копия"/></StackPanel>
+                </Button>
+                <Button x:Name="SyncBiButton" ToolTip.Tip="Двусторонняя синхронизация: изменения летят в обе стороны. Только по папке целиком - отметки не учитываются.">
+                    <StackPanel><TextBlock Text="BISYNC ⇄" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="в обе стороны"/></StackPanel>
+                </Button>
+                <Border Width="14"/>
+                <Button x:Name="PackButton" ToolTip.Tip="Упаковать отмеченное (или строку под курсором) в соседнюю панель: форматы, сжатие, шифрование, имена, SFX, проверка архива (ALT+F5).">
+                    <StackPanel><TextBlock Text="ALT+F5 АРХИВ" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="упаковать"/></StackPanel>
+                </Button>
+                <Button x:Name="UnpackButton" ToolTip.Tip="Распаковать отмеченные архивы: в соседнюю панель или здесь, умно или каждый в свою папку (ALT+F9).">
+                    <StackPanel><TextBlock Text="ALT+F9 АРХИВЫ" HorizontalAlignment="Center"/><TextBlock Classes="hint" Text="распаковать"/></StackPanel>
+                </Button>
+            </views:FlowRow>
+        </Grid>
+    </Grid>
+    </Panel>
+</Window>

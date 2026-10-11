@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><title>Audion Sync Tools — A1</title><defs><linearGradient id="audion-sync-s-flow-sea-copper-first" x1="120" y1="120" x2="910" y2="910" gradientUnits="userSpaceOnUse">
+  <stop stop-color="#61D8F5"/><stop offset="0.52" stop-color="#006994"/><stop offset="1" stop-color="#034968"/>
+  </linearGradient><linearGradient id="audion-sync-s-flow-sea-copper-second" x1="120" y1="120" x2="910" y2="910" gradientUnits="userSpaceOnUse" gradientTransform="rotate(180 512 512)">
+  <stop stop-color="#FFD19A"/><stop offset="0.52" stop-color="#DB883F"/><stop offset="1" stop-color="#874825"/>
+  </linearGradient><linearGradient id="audion-sync-s-flow-sea-copper-reverse" x1="120" y1="120" x2="910" y2="910" gradientUnits="userSpaceOnUse" gradientTransform="rotate(180 512 512)">
+  <stop stop-color="#FFD19A"/><stop offset="0.52" stop-color="#DB883F"/><stop offset="1" stop-color="#874825"/>
+  </linearGradient></defs><g fill="url(#audion-sync-s-flow-sea-copper-first)"><path d="M444 116H734L906 248L744 380H610L704 296H444C318 296 244 346 244 426C244 504 318 552 444 552H572L716 684H444C224 684 104 576 104 426C104 254 250 116 444 116Z"/></g><g fill="url(#audion-sync-s-flow-sea-copper-second)"><path d="M444 116H734L906 248L744 380H610L704 296H444C318 296 244 346 244 426C244 504 318 552 444 552H572L716 684H444C224 684 104 576 104 426C104 254 250 116 444 116Z" transform="rotate(180 512 512)"/></g></svg>

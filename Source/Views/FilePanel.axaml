@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:AudionSyncTools.Views"
+             x:Class="AudionSyncTools.Views.FilePanel"
+             x:CompileBindings="False">
+
+    <Border x:Name="Frame" Classes="frame">
+        <Panel>
+        <Border x:Name="FrameFill" Classes="framefill" IsVisible="False" IsHitTestVisible="False"/>
+        <Grid Margin="8" RowDefinitions="Auto,Auto,*,Auto">
+
+            <!-- Row 1: what the panel can show - the sources of the section: machines, buckets,
+                 folders of the data. In place of tabs: a panel remembers nothing, it shows a
+                 device. The row wraps (a section has up to ten); the tools of a panel - up,
+                 reload, the mask - live in the strip between the panels and act on the active one. -->
+            <views:FlowRow Grid.Row="0" x:Name="SourceRow" Margin="0,0,0,1"/>
+
+            <!-- Row 2: the path as crumbs; the first one is the source itself. -->
+            <Border Grid.Row="1" Classes="hsep">
+                <Grid ColumnDefinitions="*,Auto">
+                    <ScrollViewer x:Name="CrumbScroll" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+                        <StackPanel x:Name="Crumbs" Orientation="Horizontal" VerticalAlignment="Center"/>
+                    </ScrollViewer>
+                    <!-- F: only the names with this text stay in the list; Esc takes it off. -->
+                    <TextBox Grid.Column="1" x:Name="QuickBox" Classes="quick" IsVisible="False" Width="200" Margin="6,0,0,0"
+                             PlaceholderText="найти в панели" ToolTip.Tip="Сузить список активной панели (F): остаются только имена с этим текстом. Esc — снять, Enter или ↓ — к списку."/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Classes="listbg"/>
+            <DataGrid Grid.Row="2" x:Name="List" Classes="panel" HorizontalScrollBarVisibility="Disabled">
+                <DataGrid.Columns>
+                    <!-- Narrow and always busy: a folder sign, or the orange mark dot once the row is marked. -->
+                    <DataGridTemplateColumn Header="" Width="18" CanUserSort="False" CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Panel>
+                                    <Path Classes="icon" Tag="folder" IsVisible="{Binding ShowFolder}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Ellipse Classes="mark" IsVisible="{Binding Checked}"/>
+                                </Panel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="ИМЯ" Width="*" SortMemberPath="Name">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Classes="name" Text="{Binding Display}" Foreground="{Binding Colour}" FontWeight="SemiBold"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="РАЗМЕР" Width="84" SortMemberPath="Size">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Classes="muted" Text="{Binding SizeText}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <!-- One shape of the date for every row, date and time together, as the window always had it. -->
+                    <DataGridTemplateColumn Header="ДАТА" Width="132" SortMemberPath="Modified">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Classes="muted" Text="{Binding DateText}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Grid.Row="3" x:Name="Status" Classes="status" Margin="1,5,0,0" TextTrimming="CharacterEllipsis"/>
+        </Grid>
+        </Panel>
+    </Border>
+</UserControl>

@@ -1,0 +1,641 @@
+{
+  "families": [
+    {
+      "id": "documents", "shortRu": "Документы", "shortEn": "Documents",
+      "ru": "Документы и текст",
+      "en": "Documents and text",
+      "groups": [
+        {
+          "id": "microsoft_office",
+          "ru": "Microsoft Office",
+          "en": "Microsoft Office",
+          "masks": [
+            "*.docx",
+            "*.xlsx",
+            "*.pptx",
+            "*.doc",
+            "*.xls",
+            "*.ppt",
+            "*.one",
+            "*.onetoc2",
+            "*.pub",
+            "*.vsd",
+            "*.accdb",
+            "*.oft"
+          ]
+        },
+        {
+          "id": "text_markup",
+          "ru": "TXT / MD / RTF",
+          "en": "Text / Markdown / RTF",
+          "masks": [
+            "*.txt",
+            "*.md",
+            "*.markdown",
+            "*.rtf",
+            "*.csv",
+            "*.xml",
+            "*.html",
+            "*.htm",
+            "*.mht",
+            "*.ini",
+            "*.cfg",
+            "*.tab",
+            "*.dif",
+            "*.stml",
+            "*."
+          ]
+        },
+        {
+          "id": "document_viewers",
+          "ru": "PDF и viewer-форматы",
+          "en": "PDF and viewers",
+          "masks": [
+            "*.pdf",
+            "*.xps",
+            "*.chm",
+            "*.djvu",
+            "*.djv"
+          ]
+        },
+        {
+          "id": "print_plot",
+          "ru": "Печать и plot",
+          "en": "Print and plot",
+          "masks": [
+            "*.prn",
+            "*.plt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "graphics", "shortRu": "Картинки", "shortEn": "Images",
+      "ru": "Картинки",
+      "en": "Images",
+      "groups": [
+        {
+          "id": "graphics_common",
+          "ru": "Привычные rasters и web",
+          "en": "Common rasters and web",
+          "masks": [
+            "*.jpg",
+            "*.jpeg",
+            "*.png",
+            "*.webp",
+            "*.gif",
+            "*.bmp",
+            "*.heic",
+            "*.jxl",
+            "*.ico",
+            "*.cur",
+            "*.ani",
+            "*.dib",
+            "*.rle"
+          ]
+        },
+        {
+          "id": "graphics_print_design",
+          "ru": "Print / vector / design",
+          "en": "Print / vector / design",
+          "masks": [
+            "*.psd",
+            "*.svg",
+            "*.svgz",
+            "*.eps",
+            "*.emf",
+            "*.wmf",
+            "*.exr",
+            "*.hdr",
+            "*.dpx",
+            "*.tif",
+            "*.tiff"
+          ]
+        },
+        {
+          "id": "graphics_camera_raw",
+          "ru": "Camera RAW",
+          "en": "Camera RAW",
+          "masks": [
+            "*.dng",
+            "*.raw",
+            "*.cr3",
+            "*.cr2",
+            "*.nef",
+            "*.arw",
+            "*.orf",
+            "*.rw2",
+            "*.raf",
+            "*.pef",
+            "*.srw",
+            "*.3fr",
+            "*.ari",
+            "*.bay",
+            "*.braw",
+            "*.cap",
+            "*.crw",
+            "*.data",
+            "*.dcr",
+            "*.dcs",
+            "*.drf",
+            "*.eip",
+            "*.erf",
+            "*.fff",
+            "*.gpr",
+            "*.iiq",
+            "*.k25",
+            "*.kdc",
+            "*.mdc",
+            "*.mef",
+            "*.mos",
+            "*.mrw",
+            "*.nrw",
+            "*.obm",
+            "*.ptx",
+            "*.pxn",
+            "*.r3d",
+            "*.rwl",
+            "*.rwz",
+            "*.sr2",
+            "*.srf",
+            "*.x3f"
+          ]
+        },
+        {
+          "id": "graphics_fonts",
+          "ru": "Fonts",
+          "en": "Fonts",
+          "masks": [
+            "*.afm",
+            "*.otf",
+            "*.pfb",
+            "*.pfm",
+            "*.ttf"
+          ]
+        },
+        {
+          "id": "graphics_assets",
+          "ru": "Brushes и assets",
+          "en": "Brushes and assets",
+          "masks": [
+            "*.abr",
+            "*.atn",
+            "*.grd"
+          ]
+        },
+        {
+          "id": "graphics_cad_legacy",
+          "ru": "CAD и legacy graphics",
+          "en": "CAD and legacy graphics",
+          "masks": [
+            "*.dwg",
+            "*.icl",
+            "*.icn",
+            "*.pbm",
+            "*.pcd",
+            "*.pcx",
+            "*.pgm",
+            "*.pic",
+            "*.pix",
+            "*.tga",
+            "*.wor",
+            "*.xbm",
+            "*.xif",
+            "*.xpm",
+            "*.iff",
+            "*.lbm",
+            "*.psp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "archives", "shortRu": "Архивы", "shortEn": "Archives",
+      "ru": "Архивы",
+      "en": "Archives",
+      "groups": [
+        {
+          "id": "common_archives",
+          "ru": "Привычные архивы",
+          "en": "Common archives",
+          "masks": [
+            "*.zip",
+            "*.7z",
+            "*.rar",
+            "*.tar",
+            "*.gz",
+            "*.bz2"
+          ]
+        },
+        {
+          "id": "disk_images_packages",
+          "ru": "Образы дисков и packages",
+          "en": "Disk images and packages",
+          "masks": [
+            "*.iso",
+            "*.img",
+            "*.cab",
+            "*.rpm",
+            "*.tib",
+            "*.nrg"
+          ]
+        },
+        {
+          "id": "split_legacy_archives",
+          "ru": "Split и legacy архивы",
+          "en": "Split and legacy archives",
+          "masks": [
+            "*.r0?",
+            "*.r1?",
+            "*.r2?",
+            "*.r3?",
+            "*.r4?",
+            "*.r5?",
+            "*.r6?",
+            "*.r7?",
+            "*.r8?",
+            "*.r9?",
+            "*.a0?",
+            "*.a1?",
+            "*.arj",
+            "*.ace",
+            "*.lzh",
+            "*.lha",
+            "*.cpio",
+            "*.z",
+            "*.zz",
+            "*.zoo",
+            "*.uc2",
+            "*.edc",
+            "*.ha",
+            "*.ice",
+            "*.lfd",
+            "*.lof",
+            "*.lst",
+            "*.pk3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "video", "shortRu": "Видео", "shortEn": "Video",
+      "ru": "Видео",
+      "en": "Video",
+      "groups": [
+        {
+          "id": "video_modern",
+          "ru": "Современные containers",
+          "en": "Modern containers",
+          "masks": [
+            "*.mp4",
+            "*.mkv",
+            "*.mov",
+            "*.webm",
+            "*.mxf"
+          ]
+        },
+        {
+          "id": "video_common_legacy",
+          "ru": "Привычное и legacy video",
+          "en": "Common and legacy video",
+          "masks": [
+            "*.avi",
+            "*.wmv",
+            "*.mpeg",
+            "*.mpg",
+            "*.m4v",
+            "*.asf",
+            "*.divx",
+            "*.mpe"
+          ]
+        },
+        {
+          "id": "video_web_mobile",
+          "ru": "Web и mobile video",
+          "en": "Web and mobile video",
+          "masks": [
+            "*.flv",
+            "*.f4v",
+            "*.3gp",
+            "*.3g2",
+            "*.ogv",
+            "*.ogm",
+            "*.dv",
+            "*.amv",
+            "*.3gp2",
+            "*.3gpp",
+            "*.3gpp2",
+            "*.3mm"
+          ]
+        },
+        {
+          "id": "video_transport_dvd",
+          "ru": "Transport streams и DVD",
+          "en": "Transport streams and DVD",
+          "masks": [
+            "*.mts",
+            "*.m2ts",
+            "*.vob",
+            "*.ifo",
+            "*.m2v",
+            "*.m2t",
+            "*.m2p",
+            "*.m2s"
+          ]
+        },
+        {
+          "id": "video_codecs_subtitles",
+          "ru": "Codecs / stills / subtitles",
+          "en": "Codecs / stills / subtitles",
+          "masks": [
+            "*.srt",
+            "*.avif",
+            "*.heif",
+            "*.av1",
+            "*.vp9",
+            "*.m1v"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "audio", "shortRu": "Аудио", "shortEn": "Audio",
+      "ru": "Аудио",
+      "en": "Audio",
+      "groups": [
+        {
+          "id": "audio_common_compressed",
+          "ru": "Привычное сжатое audio",
+          "en": "Common compressed audio",
+          "masks": [
+            "*.mp3",
+            "*.m4a",
+            "*.aac",
+            "*.ogg",
+            "*.opus",
+            "*.wma",
+            "*.m4b",
+            "*.mp2",
+            "*.mp1",
+            "*.mpga",
+            "*.oga",
+            "*.aax",
+            "*.m4p",
+            "*.m4r"
+          ]
+        },
+        {
+          "id": "audio_lossless",
+          "ru": "Lossless и studio audio",
+          "en": "Lossless and studio audio",
+          "masks": [
+            "*.wav",
+            "*.flac",
+            "*.aiff",
+            "*.aif",
+            "*.alac",
+            "*.ape",
+            "*.wv",
+            "*.tak",
+            "*.tta",
+            "*.caf",
+            "*.aifc"
+          ]
+        },
+        {
+          "id": "audio_multichannel_voice",
+          "ru": "Multichannel и voice",
+          "en": "Multichannel and voice",
+          "masks": [
+            "*.mka",
+            "*.ac3",
+            "*.eac3",
+            "*.dts",
+            "*.amr",
+            "*.vox",
+            "*.mogg"
+          ]
+        },
+        {
+          "id": "audio_midi_tracker",
+          "ru": "MIDI / tracker / chip",
+          "en": "MIDI / tracker / chip",
+          "masks": [
+            "*.mid",
+            "*.midi",
+            "*.mod",
+            "*.xm",
+            "*.s3m",
+            "*.sid",
+            "*.spc",
+            "*.snd",
+            "*.voc"
+          ]
+        },
+        {
+          "id": "audio_legacy",
+          "ru": "Legacy audio",
+          "en": "Legacy audio",
+          "masks": [
+            "*.cda",
+            "*.ra",
+            "*.ram",
+            "*.rm",
+            "*.rmi",
+            "*.mpa",
+            "*.mpc",
+            "*.movpkg",
+            "*.rmx",
+            "*.rv",
+            "*.sfx"
+          ]
+        },
+        {
+          "id": "playlists_cues",
+          "ru": "Плейлисты и cue",
+          "en": "Playlists and cues",
+          "masks": [
+            "*.m3u",
+            "*.m3u8",
+            "*.cue",
+            "*.fpl"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apps", "shortRu": "Программы", "shortEn": "Apps",
+      "ru": "Приложения и Windows",
+      "en": "Apps and Windows",
+      "groups": [
+        {
+          "id": "windows_apps",
+          "ru": "Windows apps и installers",
+          "en": "Windows apps and installers",
+          "masks": [
+            "*.exe",
+            "*.msi",
+            "*.msp",
+            "*.com",
+            "*.scr",
+            "*.cpl",
+            "*.pif"
+          ]
+        },
+        {
+          "id": "shortcuts_links",
+          "ru": "Ярлыки и ссылки",
+          "en": "Shortcuts and links",
+          "masks": [
+            "*.lnk",
+            "*.url"
+          ]
+        },
+        {
+          "id": "app_scripts",
+          "ru": "Скрипты приложений",
+          "en": "App scripts",
+          "masks": [
+            "*.jar",
+            "*.vbs",
+            "*.vbe",
+            "*.bat",
+            "*.cmd",
+            "*.ps1"
+          ]
+        },
+        {
+          "id": "app_packages",
+          "ru": "Packages / widgets / binary",
+          "en": "Packages / widgets / binary",
+          "masks": [
+            "*.app",
+            "*.bin",
+            "*.dex",
+            "*.wgt",
+            "*.widget"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "development", "shortRu": "Код", "shortEn": "Code",
+      "ru": "Разработка и конфиги",
+      "en": "Development and config",
+      "groups": [
+        {
+          "id": "code_languages",
+          "ru": "Языки кода",
+          "en": "Code languages",
+          "masks": [
+            "*.java",
+            "*.cs",
+            "*.go",
+            "*.rs",
+            "*.c",
+            "*.cpp",
+            "*.h",
+            "*.hpp",
+            "*.kt",
+            "*.swift"
+          ]
+        },
+        {
+          "id": "python_notebooks",
+          "ru": "Python и notebooks",
+          "en": "Python and notebooks",
+          "masks": [
+            "*.py",
+            "*.ipynb",
+            "*.pyw"
+          ]
+        },
+        {
+          "id": "web_frontend",
+          "ru": "Web / JS / TS",
+          "en": "Web / JS / TS",
+          "masks": [
+            "*.css",
+            "*.js",
+            "*.ts",
+            "*.tsx",
+            "*.jsx",
+            "*.scss"
+          ]
+        },
+        {
+          "id": "shell_scripts",
+          "ru": "Shell / PowerShell / CMD",
+          "en": "Shell / PowerShell / CMD",
+          "masks": [
+            "*.sh",
+            "*.bash",
+            "*.zsh",
+            "*.psm1",
+            "*.psd1"
+          ]
+        },
+        {
+          "id": "config_data",
+          "ru": "Конфиги и data",
+          "en": "Config and data",
+          "masks": [
+            "*.json",
+            "*.yaml",
+            "*.yml",
+            "*.toml",
+            "*.conf"
+          ]
+        },
+        {
+          "id": "infrastructure",
+          "ru": "Infrastructure",
+          "en": "Infrastructure",
+          "masks": [
+            "*.sql",
+            "*.tf",
+            "*.tfvars",
+            "*.hcl",
+            "*.nix"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "temporary", "shortRu": "Служебные", "shortEn": "Service",
+      "ru": "Временные и служебные",
+      "en": "Temporary and service files",
+      "groups": [
+        {
+          "id": "temp_backup",
+          "ru": "Временные и резервные",
+          "en": "Temporary and backup",
+          "masks": [
+            "*.tmp",
+            "*.bak",
+            "*.old",
+            "*.log",
+            "*.swp",
+            "*.backup",
+            "*.wbk",
+            "*.org",
+            "*.pk",
+            "~*.*",
+            "$*.*",
+            "*.$??",
+            "*.~~~",
+            "backup_of_*.*"
+          ]
+        },
+        {
+          "id": "os_clutter",
+          "ru": "Служебные файлы систем",
+          "en": "System clutter",
+          "masks": [
+            ".DS_Store"
+          ]
+        }
+      ]
+    }
+  ]
+}

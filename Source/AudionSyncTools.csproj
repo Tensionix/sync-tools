@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Audion Sync Tools on Avalonia. The window is C#; the engine stays PowerShell (Engine\ and
+    Tunnel\) and is run by the program's own PowerShell 7 - Source\Ps, published beside the window
+    as App\AudionPs.exe. No PowerShell of the machine, neither 5.1 nor 7, takes part.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>AudionSyncTools</AssemblyName>
+    <RootNamespace>AudionSyncTools</RootNamespace>
+    <!-- The description and the product of the exe: Windows names a taskbar pin, Task Manager
+         and the Start menu by them. -->
+    <AssemblyTitle>Audion Sync Tools</AssemblyTitle>
+    <Product>Audion Sync Tools</Product>
+    <!-- The number has one owner, config\version.json: the window shows it from there, and the
+         exe says the same. A number of its own here went its own way - 2.0.1 in the file
+         properties under a window that said 2.0.0. -->
+    <VersionFile>$(MSBuildProjectDirectory)\..\config\version.json</VersionFile>
+    <Version>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(VersionFile)')), '"version"\s*:\s*"([^"]+)"').Groups[1].Value)</Version>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
+    <!-- Source\Ps is a project of its own: its files are not part of the window. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);Ps\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.2" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <!-- Portable: the dictionary, the row colours and the mask families travel next to the executable. -->
+  <ItemGroup>
+    <None Include="config\colors\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="config\mask-groups.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="config\i18n.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="config\bars.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

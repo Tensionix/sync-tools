@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The PowerShell 7 of Audion Sync Tools: the console host of Microsoft.PowerShell.SDK under the
+    program's own name. Every wrapper (.cmd) and the window run the scripts of Engine\ and Tunnel\
+    with it, so no PowerShell of the machine - neither 5.1 nor 7 - takes part. It is published into
+    App\ beside the window and shares the runtime and the engine with it.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AssemblyName>AudionPs</AssemblyName>
+    <RootNamespace>AudionSyncTools.Ps</RootNamespace>
+    <Product>Audion Sync Tools</Product>
+    <AssemblyTitle>Audion Sync Tools - PowerShell 7</AssemblyTitle>
+    <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
+    <ApplicationIcon>..\Assets\app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.6.6" />
+  </ItemGroup>
+
+  <!-- A win-x64 publish puts System.Management.Automation.dll in the root of the output, and
+       PowerShell looks for its built-in modules (Management, Utility, Security...) next to it, in
+       Modules\. The SDK leaves them under runtimes\win\...\Modules: copied up, and the Unix ones
+       dropped. ref\ stays: the engine compiles Add-Type against it, and the scripts use Add-Type.
+       Debug symbols go: nobody running the program needs them. -->
+  <Target Name="ArrangePublish" AfterTargets="Publish">
+    <ItemGroup>
+      <PackagePdb Include="$(PublishDir)*.pdb" />
+      <PsModule Include="$(PublishDir)runtimes\win\lib\net10.0\Modules\**\*" />
+    </ItemGroup>
+    <Delete Files="@(PackagePdb)" />
+    <Copy SourceFiles="@(PsModule)" DestinationFiles="@(PsModule->'$(PublishDir)Modules\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <RemoveDir Directories="$(PublishDir)runtimes\unix" />
+  </Target>
+</Project>
