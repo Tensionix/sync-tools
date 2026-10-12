@@ -8,7 +8,7 @@
   <a href="https://github.com/Tensionix/sync-tools/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Tensionix/sync-tools?style=flat-square&color=5fd08a&logo=apache&logoColor=white&cacheSeconds=3600"></a>
 </p>
 
-**Version 2.0.0** · 2026-10-11 · 148.2 MB
+**Version 2.0.0** · 2026-10-12 · 148.2 MB
 
 - [Direct download](https://audion.dev/get/sync-tools/2.0.0/Audion_Sync_Tools_v2.0.0_Full.zip) — unmetered, no rate limits
 - [Project page](https://audion.dev/downloads/sync-tools) — every version and how to install
