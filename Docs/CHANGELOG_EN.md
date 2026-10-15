@@ -4,6 +4,7 @@
 
 **Contents**
 
+- [2.0.1 — 15 October 2026](#201--15-october-2026)
 - [2.0.0 — 9 October 2026](#200--9-october-2026)
 - [1.19.2 — 26 September 2026](#1192--26-september-2026)
 - [1.19.1 — 26 September 2026](#1191--26-september-2026)
@@ -56,6 +57,12 @@
 - [1.2.0 — 5 September 2026](#120--5-september-2026)
 - [1.1.0 — 5 September 2026](#110--5-september-2026)
 - [1.0.0 — 5 September 2026](#100--5-september-2026)
+
+## 2.0.1 — 15 October 2026
+
+**The cryptography packages of PowerShell.** Microsoft.PowerShell.SDK 7.6.6 brings System.Security.Cryptography.Pkcs
+and .Xml 10.0.10, which have known vulnerabilities; the PowerShell of the program (`App\AudionPs.exe`) is now built
+with version 10.0.13 of both. PowerShell itself stays 7.6.6, and the window does not change.
 
 ## 2.0.0 — 9 October 2026
 
