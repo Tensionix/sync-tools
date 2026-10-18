@@ -161,13 +161,14 @@ All of it is remembered between runs.
 
 | Section | In the panels | In the buttons |
 | --- | --- | --- |
-| **SETUP** — first setup | the profile, `config\rclone`, the golden copy, Export Keys, the data folder, LOCAL | the steps of setting up: addresses, keys, SSHD, SSH TUN, RESTORE, RCLONE.CONF |
+| **SETUP** — first setup, a button at the top right | the profile, `config\rclone`, the golden copy, Export Keys, the data folder, LOCAL | the steps of setting up: addresses, keys, SSHD, SSH TUN, RESTORE, RCLONE.CONF |
 | **SSH KEYS** — machine keys | the golden copy, Export Keys, the profile, `config\rclone` | LIST, SSH-COPY-ID, REVOKE, EXPORT KEYS, R2 CREDS |
 | **TUNNEL** — network setup | the machines, MAIN VPS, LOCAL | the probe and DIAGNOSTICS, CLOUDFLARED, OPENVPN, the router, DNS, WIREGUARD, WG BASE-ROUTER |
 | **REMOTE** — terminal and RDP | the machines, MAIN VPS, LOCAL | terminals of machines and routers, RDP, ROUTER WEB, SOCKS, the choice of a terminal program |
 | **STORAGE** — snapshots and R2 | the nightly snapshots, the data folder, five R2 buckets, MAIN VPS, SECOND VPS, LOCAL | SYNC ALL, SYNC SELECTED, DRY RUN, PRIVATE BACKUP |
 | **CLOUDS** — cloud drives | the machines, LOCAL and the clouds you connected | connect a cloud, sign in again, rename, disconnect, check, the keys of the clouds |
-| **SETTINGS** | the settings in place of the panels | the data folder, tools and versions, the editor of F4, the font, translucency, sizes |
+| **SETTINGS** — a button at the top right | the settings in place of the panels | the data folder, tools and versions, the editor of F4, the font, translucency, sizes |
+| **ABOUT** — a button at the top right | the program in place of the panels | the version, the folders, the documents, the link to the releases |
 
 The pin button of the strip between the panels pins a section: at the next
 start the window opens on it. What does not fit across the width of a row moves
@@ -578,14 +579,23 @@ available.
 `AUTO` listens to the probe; the others keep what was chosen even when the probe
 disagrees — a person knows more about a network than a knock on a port. The
 route stands in the caption of the source above the panel:
-`BASE · SSH MAIN VPS CF`.
+`BASE · SSH MAIN VPS CF`. A choice made with the buttons of the row holds until
+the program is closed.
 
-Home always wins. Of the far ones SECOND VPS is fastest — it does not
-cross a border — yet it comes last on purpose: sensitive data never travels
-through it, and filtered networks reset its ssh. The two routes through MAIN VPS are
-equal in speed and differ in survivability: by name a session opens faster,
-while cloudflared passes where nothing else does, because MAIN VPS has no
-open port at all.
+Home always wins. From afar `AUTO` takes the VPS that answers the probe faster:
+MAIN VPS by its name or SECOND VPS — each timed to the server itself. Less than
+a tenth apart (or 5 ms) is no difference, and MAIN VPS comes first then: the route
+does not jump from probe to probe. The route over cloudflared has no time of its
+own to MAIN VPS — the probe only reaches the edge of Cloudflare — so it comes after
+the timed ones, yet it passes where nothing else does: MAIN VPS has no open port
+at all. Sensitive data never travels through SECOND VPS: pin `SSH MAIN VPS` with
+a button of the row for it.
+
+The kebab `⋮` at the end of the row opens the routes per machine: each machine
+its own, with the time to the nearest node. `APPLY` — until the program is
+closed, `MAKE DEFAULT` — for the starts to come as well, `RESET` — `AUTO` for every
+machine with no defaults, as in a fresh program. A tangerine dot on the kebab
+means the routes now are not the defaults.
 
 The probe decides — at startup and on the `PORT 22 TCP PING` button
 (TUNNEL → NET). Next to it stands `DIAGNOSTICS`: it walks every route to BASE and
@@ -594,9 +604,9 @@ the report goes into `logs`. In an unfamiliar network it is the place to start:
 it answers "what do I work through right now".
 
 **Routes by machine.** One choice for all does not always fit: the home network
-may reach BASE and not a machine in another network. The button with the
-network sign in the strip between the panels gives each machine a route of its
-own.
+may reach BASE and not a machine in another network. The kebab at the end of the
+`ROUTE` row and the button with the network sign in the strip between the panels
+give each machine a route of its own.
 
 The line in the middle of the header says what is reachable and where the window
 will go:
@@ -667,8 +677,10 @@ The same facts come from a console through
 
 ### SETTINGS
 
-The settings stand in place of the panels; the log stays beside them. Esc or the
-cross leaves the section.
+The `SETTINGS` button stands at the top right, beside `SETUP`, `ABOUT`, the
+language and the theme. The settings stand in place of the panels; the log stays
+beside them. Esc, the cross or the same button leaves them. A tangerine dot on the
+button means a newer version of a tool is out; the hint of the button names which.
 
 - **DATA FOLDER** — where it is now; `CHOOSE` another, `OPEN` it in Explorer.
   With another folder the window changes in one step: the clouds of the old one
@@ -694,6 +706,13 @@ cross leaves the section.
 The settings of the window live in `config\gui-settings.json` of the program and
 do not go into the data folder. The sets of masks and the pairs of BISYNC are not
 settings of the window but what was made in it: they lie in the data folder.
+
+### ABOUT
+
+The `ABOUT` button at the top right shows, in place of the panels, the version
+of the program, its folder and the data folder. From here open the user guide,
+the changelog, the restore instructions and the README — in the language of the
+window — the folder of licenses and the page of releases on GitHub.
 
 ### Clouds
 

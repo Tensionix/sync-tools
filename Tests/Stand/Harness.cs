@@ -1081,6 +1081,103 @@ static class Stand
             }
         }
 
+        // ------------------------------------------------------------ АВТО picks the VPS by its time (2.2.0)
+        // From afar АВТО takes the VPS that answers faster: MAIN VPS by name or SECOND VPS. Times within a tenth
+        // (or 5 ms) are equal - MAIN VPS then; a silent VPS is passed by; cloudflared, with no time of MAIN VPS
+        // itself, goes after a road with a time; at home the home network all the same. Sources.RoadMs came
+        // with 2.2.0: reached by its name, so the probes still build against an older window.
+        {
+            Home();
+            var conf = Rclone.TransportPath;
+            var kept = File.ReadAllText(conf);
+            var times = typeof(Sources).GetProperty("RoadMs")?.GetValue(null) as Dictionary<string, double>;
+            var picked = new Dictionary<string, string>(Sources.Picked);
+            try
+            {
+                File.AppendAllText(conf, "\n[base-direct]\ntype = sftp\nhost = 192.0.2.11\n\n[base-cf]\ntype = sftp\nhost = 192.0.2.12\n");
+                Sources.Picked.Clear(); Sources.RouteFail.Clear(); Sources.LanUp.Clear();
+                Sources.LanUp["base"] = false; Sources.LanUp["direct"] = true; Sources.LanUp["cloud"] = true; Sources.LanUp["second"] = true;
+                string Road(double? main, double? second)
+                {
+                    times?.Clear();
+                    if (main is { } m) times?.Add("direct", m);
+                    if (second is { } s) times?.Add("second", s);
+                    return Sources.RouteName("base");
+                }
+                var secondFaster = Road(80, 30);
+                var mainFaster = Road(20, 30);
+                var nearlyEqual = Road(50, 47);
+                Sources.LanUp["second"] = false;
+                var secondSilent = Road(80, null);
+                Sources.LanUp["second"] = true; Sources.LanUp["direct"] = false;
+                var overCloud = Road(null, 30);
+                Sources.LanUp["direct"] = true; Sources.LanUp["base"] = true;
+                var atHome = Road(80, 30);
+                Verdict("АВТО: VPS по задержке, разница в десятую - MAIN VPS, дома - домашняя сеть",
+                    times is not null && secondFaster == Sources.RouteVia && mainFaster == Sources.RouteMain && nearlyEqual == Sources.RouteMain
+                        && secondSilent == Sources.RouteMain && overCloud == Sources.RouteVia && atHome == "",
+                    new { known = times is not null, secondFaster, mainFaster, nearlyEqual, secondSilent, overCloud, atHome });
+            }
+            finally
+            {
+                File.WriteAllText(conf, kept);
+                times?.Clear();
+                Sources.LanUp.Clear(); Sources.RouteFail.Clear(); Sources.Picked.Clear();
+                foreach (var (key, value) in picked) Sources.Picked[key] = value;
+                Home();
+            }
+        }
+
+        // ------------------------------------------------------------ the board of routes: MAKE DEFAULT, RESET (2.2.0)
+        // The roads of the board become the defaults the window starts with; СБРОСИТЬ gives every machine
+        // АВТО and wipes the defaults - a program as it comes. The buttons are pressed in the real dialog.
+        {
+            Home();
+            var settings = new Settings { UiFont = "Inter", PanelFont = "Inter" };
+            var window = Window(settings);
+            Sources.Picked["base"] = "via";
+            bool Press(params string[] captions)
+            {
+                Call(window, "ShowRouteBoard");
+                if (!Until(() => window.OwnedWindows.Count == 1, 5000)) return false;
+                var dialog = window.OwnedWindows[0];
+                var button = dialog.GetVisualDescendants().OfType<Button>().FirstOrDefault(b => b.Content is string text && captions.Contains(text));
+                if (button is null) { dialog.Close(); Pump(200); return false; }
+                button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Until(() => window.OwnedWindows.Count == 0, 5000);
+                Pump(300);
+                return true;
+            }
+            bool made = Press("СДЕЛАТЬ ПО УМОЛЧАНИЮ", "MAKE DEFAULT");
+            bool saved = made && settings.Routes.GetValueOrDefault("base") == "via" && Sources.Picked.GetValueOrDefault("base") == "via";
+            bool reset = Press("СБРОСИТЬ", "RESET");
+            bool wiped = reset && settings.Routes.Count == 0 && Sources.Picked.GetValueOrDefault("base", "") == "";
+            Verdict("доска маршрутов: СДЕЛАТЬ ПО УМОЛЧАНИЮ сохраняет, СБРОСИТЬ - всем АВТО без умолчаний", saved && wiped,
+                new { made, saved, reset, wiped, defaults = string.Join(",", settings.Routes.Select(pair => pair.Key + "=" + pair.Value)), now = Sources.Picked.GetValueOrDefault("base") });
+            Close(window);
+            Sources.Picked.Clear();
+            Home();
+        }
+
+        // ------------------------------------------------------------ the roads of a session and the defaults (2.1.0)
+        // The ROUTE row and its board change the roads of this session only: the window starts with the
+        // defaults of SETTINGS, and the settings keep them. Before 2.1.0 the row wrote its road into them.
+        {
+            Home();
+            var settings = new Settings { UiFont = "Inter", PanelFont = "Inter", Routes = new() { ["base"] = "via" } };
+            var window = Window(settings);
+            bool started = Sources.Picked.GetValueOrDefault("base") == "via";
+            Call(window, "SetRoute", "direct");
+            Pump(200);
+            bool session = Sources.Picked.GetValueOrDefault("base") == "direct";
+            bool kept = settings.Routes.GetValueOrDefault("base") == "via";
+            Verdict("маршрут кнопкой ряда - на сеанс, умолчание остаётся", started && session && kept,
+                new { started, session, kept, now = Sources.Picked.GetValueOrDefault("base"), defaults = settings.Routes.GetValueOrDefault("base") });
+            Close(window);
+            Sources.Picked.Clear();
+            Home();
+        }
+
         // ------------------------------------------------------------ AST-M06
         // -Root names the data folder of one run: the pointer of the program is left alone, a
         // folder that is not there is not replaced by a guess, and the sets of masks an older

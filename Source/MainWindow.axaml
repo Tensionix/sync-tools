@@ -40,6 +40,15 @@
                 <Button x:Name="StreamsUp" Classes="tool" Margin="0,0,12,3" ToolTip.Tip="Вдвое больше одновременных передач: быстрому каналу и множеству мелких файлов.">
                     <Path Classes="icon" Tag="plus"/>
                 </Button>
+                <!-- What is set once and seldom: the first setup, the settings with the tools and their
+                     updates (the dot), the program itself - beside the language and the look. -->
+                <ToggleButton x:Name="SetupButton" Classes="switch" Margin="0,0,4,3" Content="SETUP" ToolTip.Tip="Первая настройка машины: адреса, ключи, SSHD, SSH TUN, RESTORE, RCLONE.CONF."/>
+                <Panel Margin="0,0,4,3">
+                    <ToggleButton x:Name="SettingsButton" Classes="switch" Content="SETTINGS" ToolTip.Tip="Папка данных, инструменты и их обновление, редактор F4, вид окна."/>
+                    <Ellipse x:Name="UpdateDot" Width="8" Height="8" Fill="{DynamicResource Tangerine}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                             Margin="0,3,3,0" IsVisible="False" IsHitTestVisible="False"/>
+                </Panel>
+                <ToggleButton x:Name="AboutButton" Classes="switch" Margin="0,0,12,3" Content="ABOUT" ToolTip.Tip="О программе: версия, папки, документы, ссылки."/>
                 <Button x:Name="LangButton" Classes="small" Margin="0,0,12,3" ToolTip.Tip="Язык интерфейса: RU, EN."/>
                 <ToggleButton x:Name="ThemeButton" Classes="switch icon" Margin="0,0,0,3" ToolTip.Tip="Тема: Audion Vault Dark (по умолчанию), Audion Dark, Audion Code Dark или Audion Light.">
                     <Path Classes="icon" Tag="sun"/>
@@ -62,11 +71,20 @@
             <StackPanel Grid.Column="0" x:Name="SectionRow" Orientation="Horizontal" VerticalAlignment="Center"/>
             <StackPanel Grid.Column="1" x:Name="RouteRow" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="16,0,0,3">
                 <TextBlock Classes="caption" Text="МАРШРУТ" Margin="0,0,8,0"/>
-                <ToggleButton x:Name="RouteAuto" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="АВТО" ToolTip.Tip="Маршрут выбирает проба: дома - по домашней сети, издалека - через MAIN VPS по имени, затем поверх cloudflared, затем через SECOND VPS."/>
+                <ToggleButton x:Name="RouteAuto" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="АВТО" ToolTip.Tip="Маршрут выбирает проба: дома - по домашней сети, издалека - VPS, который отвечает быстрее: MAIN VPS по имени или SECOND VPS; молчит - следующий."/>
                 <ToggleButton x:Name="RouteHome" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="LAN" ToolTip.Tip="Всегда напрямую, по адресу машины в её сети."/>
                 <ToggleButton x:Name="RouteDirect" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="SSH MAIN VPS" ToolTip.Tip="Всегда прыжком через MAIN VPS по его прямому имени."/>
                 <ToggleButton x:Name="RouteCf" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="SSH MAIN VPS CF" ToolTip.Tip="Всегда прыжком через MAIN VPS поверх cloudflared: открытого порта у него нет, и блокировать нечего."/>
                 <ToggleButton x:Name="RouteVia" Classes="switch" VerticalAlignment="Center" Margin="0,0,4,0" Content="SSH SECOND VPS" ToolTip.Tip="Всегда прыжком через SECOND VPS. Чувствительное этим маршрутом не возят."/>
+                <!-- The kebab of the row: the board of the roads per machine for this session, with the time to each
+                     nearest node; the dot says the roads are not the defaults of SETTINGS. -->
+                <Panel Margin="8,0,0,0" VerticalAlignment="Center">
+                    <Button x:Name="RouteMore" Classes="tool" ToolTip.Tip="Маршруты по машинам: у каждой машины свой, с замером до ближайшего узла. Выбор - на этот сеанс или по умолчанию, для следующих запусков. Оранжевая точка: маршруты сейчас не те, что по умолчанию.">
+                        <Path Classes="icon" Tag="ellipsis-vertical"/>
+                    </Button>
+                    <Ellipse x:Name="RouteMoreDot" Width="7" Height="7" Fill="{DynamicResource Tangerine}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                             Margin="0,1,1,0" IsVisible="False" IsHitTestVisible="False"/>
+                </Panel>
             </StackPanel>
         </Grid>
 

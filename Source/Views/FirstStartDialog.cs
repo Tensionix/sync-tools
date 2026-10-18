@@ -130,6 +130,12 @@ public static class FirstStartDialog
             dialog.Close();
         };
         await dialog.ShowDialog(owner);
+        // On Windows the code after this await runs while the owner still lists the dialog among its
+        // OwnedWindows: Avalonia takes it out only after Closed. The answer changes the data folder,
+        // and ChooseDataFolder refuses while a window of the program stands on the screen - the folder
+        // picked here was refused as "an operation is running" (18.10.2026). One step of the
+        // dispatcher, and the dialog is gone from the owner. The stand without a screen does not see it.
+        await Task.Yield();
         return result;
     }
 }

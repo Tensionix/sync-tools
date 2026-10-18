@@ -33,8 +33,19 @@ public partial class MainWindow
             (RouteAuto, ""), (RouteHome, "home"), (RouteDirect, "direct"), (RouteCf, "cf"), (RouteVia, "via"),
         };
         foreach (var (button, key) in buttons) button.Click += (_, _) => { if (!_routeBusy) SetRoute(key); };
+        // The kebab of the row: the roads per machine, for this session or as the defaults the window starts
+        // with (the owner, 18.10.2026: «Из SETTINGS выбор дорог убираем. Вместо этого: делаем кнопку в кебабе
+        // ... СДЕЛАТЬ ПО УМОЛЧАНИЮ», and «кнопку RESET в этом диалоге - вернуть как было с релиза»).
+        RouteMore.Click += (_, _) => ShowRouteBoard();
         MarkRoute();
     }
+
+    /// <summary>The machines a road is chosen for, in the order of the board.</summary>
+    static readonly string[] RouteMachines = { "base", "laptop", "server", "home", "dad", "work" };
+
+    /// <summary>Whether the roads of this session are the saved defaults.</summary>
+    bool SameAsDefaults() => Sources.All.Values.Where(s => s.Probe.Length > 0)
+        .All(s => Sources.Picked.GetValueOrDefault(s.Key, "") == _settings.Routes.GetValueOrDefault(s.Key, ""));
 
     /// <summary>The route all machines share, or null when they differ.</summary>
     string? CommonRoute()
@@ -54,6 +65,7 @@ public partial class MainWindow
             RouteDirect.IsChecked = common == "direct";
             RouteCf.IsChecked = common == "cf";
             RouteVia.IsChecked = common == "via";
+            RouteMoreDot.IsVisible = !SameAsDefaults();
         }
         finally { _routeBusy = false; }
     }
@@ -61,13 +73,12 @@ public partial class MainWindow
     /// <summary>
     /// A route picked by hand; the empty key gives the choice back to the probe. A button of the
     /// row sets it for every machine at once, and the panels of machines are read again at once:
-    /// the point of the button is to see the result, not to remember an intention.
+    /// the point of the button is to see the result, not to remember an intention. For this
+    /// session only: the window starts with the defaults saved by the board.
     /// </summary>
     void SetRoute(string key)
     {
         foreach (var source in Sources.All.Values.Where(s => s.Probe.Length > 0)) Sources.Picked[source.Key] = key;
-        _settings.Routes = Sources.Picked;
-        _settings.Save();
         MarkRoute();
         AfterRouteChange();
     }
@@ -82,42 +93,55 @@ public partial class MainWindow
     }
 
     /// <summary>
-    /// The board of routes per machine (the kebab of the strip between the panels). The time shown
-    /// is to the nearest node of a road, not through to the machine: a through measure would mean
-    /// a knock along every road and would hold the window for seconds.
+    /// The roads a machine really has, as the board shows them: АВТО, its own address, MAIN VPS by
+    /// name, MAIN VPS over cloudflared, SECOND VPS - each with the time to its nearest node, a silent
+    /// one dimmed.
+    /// </summary>
+    List<Views.RouteOption> RouteOptions(string key, Source source, string where)
+    {
+        bool Live(string node) => !Sources.LanUp.TryGetValue(node, out var up) || up;
+        string Time(string node) => _lanMs.ContainsKey(node) ? Delay(_lanMs[node]) : "";
+
+        var options = new List<Views.RouteOption>
+        {
+            new("", "АВТО", "Маршрут выбирает проба, для каждой машины отдельно: дома - домашняя сеть, издалека - VPS, который отвечает быстрее."),
+            // The first road is captioned by the address itself: words are useless here, the address shows where it leads.
+            new("home", where.Length > 0 ? where : "адреса нет",
+                key is "base" or "laptop"
+                    ? "Прямо на адрес, без jump host. Это домашняя сеть: работает дома и пока поднят туннель до сети BASE."
+                    : "Прямо на адрес, без jump host. Адрес вписан кнопкой АДРЕСА",
+                Time(source.Probe), Live(source.Probe)),
+        };
+        if (Rclone.Configured(source.RemoteSsh) || Rclone.Configured(source.RemoteDirect))
+            options.Add(new("direct", Sources.RouteMain, "Через MAIN VPS по его прямому имени: в SSH TUN машины, если он заведён, иначе через jump host.", Time("direct"), Live("direct")));
+        if (Rclone.Configured(source.RemoteCf))
+            options.Add(new("cf", Sources.RouteCf, "Тот же MAIN VPS поверх cloudflared: выглядит обычным HTTPS.", Time("cloud"), Live("cloud")));
+        if (Rclone.Configured(source.RemoteVia))
+            options.Add(new("via", Sources.RouteVia, "Через SECOND VPS. Границу не пересекает.", Time("second"), Live("second")));
+        return options;
+    }
+
+    /// <summary>Where the road of a machine really leads: the names LAN and SECOND VPS say nothing until the address is seen.</summary>
+    static string WhereOf(Dictionary<string, Target> targets, string key) =>
+        targets.TryGetValue(key, out var target) ? (target.Lan.Length > 0 ? target.Lan : target.Host) : "";
+
+    /// <summary>
+    /// The board of routes per machine (the kebab of the ROUTE row and of the strip between the
+    /// panels): the roads of this session, or the defaults the window starts with. The time shown is to the nearest node of a road, not
+    /// through to the machine: a through measure would mean a knock along every road and would hold
+    /// the window for seconds.
     /// </summary>
     async void ShowRouteBoard()
     {
         using var pending = Pending();
         var targets = Targets.Read().ToDictionary(t => t.Key, t => t);
         var rows = new List<Views.RouteRow>();
-        foreach (var key in new[] { "base", "laptop", "server", "home", "dad", "work" })
+        foreach (var key in RouteMachines)
         {
             if (!Sources.All.TryGetValue(key, out var source) || source.Probe.Length == 0) continue;
-            // Where the road really leads: the names LAN and SECOND VPS say nothing until the address is seen.
-            var where = targets.TryGetValue(key, out var target) ? (target.Lan.Length > 0 ? target.Lan : target.Host) : "";
-            bool Live(string node) => !Sources.LanUp.TryGetValue(node, out var up) || up;
-            string Time(string node) => _lanMs.ContainsKey(node) ? Delay(_lanMs[node]) : "";
-
-            var options = new List<Views.RouteOption>
-            {
-                new("", "АВТО", "Маршрут выбирает проба, и для каждой машины отдельно."),
-                // The first road is captioned by the address itself: words are useless here, the address shows where it leads.
-                new("home", where.Length > 0 ? where : "адреса нет",
-                    key is "base" or "laptop"
-                        ? "Прямо на адрес, без jump host. Это домашняя сеть: работает дома и пока поднят туннель до сети BASE."
-                        : "Прямо на адрес, без jump host. Адрес вписан кнопкой АДРЕСА",
-                    Time(source.Probe), Live(source.Probe)),
-            };
-            if (Rclone.Configured(source.RemoteSsh) || Rclone.Configured(source.RemoteDirect))
-                options.Add(new("direct", Sources.RouteMain, "Через MAIN VPS по его прямому имени: в SSH TUN машины, если он заведён, иначе через jump host.", Time("direct"), Live("direct")));
-            if (Rclone.Configured(source.RemoteCf))
-                options.Add(new("cf", Sources.RouteCf, "Тот же MAIN VPS поверх cloudflared: выглядит обычным HTTPS.", Time("cloud"), Live("cloud")));
-            if (Rclone.Configured(source.RemoteVia))
-                options.Add(new("via", Sources.RouteVia, "Через SECOND VPS. Границу не пересекает.", Time("second"), Live("second")));
-
+            var where = WhereOf(targets, key);
             rows.Add(new Views.RouteRow(key, source.Label, Sources.Picked.GetValueOrDefault(key, ""),
-                Lang.F("куда ходит: {0}", where.Length > 0 ? where : Lang.T("адрес не вписан")), options));
+                Lang.F("куда ходит: {0}", where.Length > 0 ? where : Lang.T("адрес не вписан")), RouteOptions(key, source, where)));
         }
         if (rows.Count == 0) return;
 
@@ -125,12 +149,23 @@ public partial class MainWindow
         {
             "Замер показан до ближайшего узла маршрута, а не до самой машины.",
             "Погашенное сейчас молчит. Маршрут, которого у машины нет, здесь не показан вовсе.",
+            "АВТО издалека берёт VPS, который отвечает быстрее: MAIN VPS по имени или SECOND VPS; разница меньше десятой доли - не разница.",
+            "ПРИМЕНИТЬ - до закрытия программы; СДЕЛАТЬ ПО УМОЛЧАНИЮ - и для следующих запусков; СБРОСИТЬ - всем машинам АВТО, как в новой программе.",
         });
         if (answer is null) return;
 
-        foreach (var (key, route) in answer) Sources.Picked[key] = route;
-        _settings.Routes = Sources.Picked;
-        _settings.Save();
+        foreach (var (key, route) in answer.Picked) Sources.Picked[key] = route;
+        if (answer.Kind == Views.RouteBoardKind.MakeDefault)
+        {
+            _settings.Routes = new Dictionary<string, string>(Sources.Picked);
+            _settings.Save();
+        }
+        else if (answer.Kind == Views.RouteBoardKind.Reset)
+        {
+            Sources.Picked.Clear();
+            _settings.Routes = new Dictionary<string, string>();
+            _settings.Save();
+        }
         // The row of buttons shows a common road only when it really is common.
         MarkRoute();
         Journal.Add("");
@@ -141,6 +176,8 @@ public partial class MainWindow
             var said = row.Options.FirstOrDefault(o => o.Key == now);
             Journal.Add($"{Lang.T(row.Label),-10} {(said is null ? Lang.T("АВТО") : Lang.T(said.Label))}");
         }
+        if (answer.Kind == Views.RouteBoardKind.MakeDefault) Journal.Add(Lang.T("сохранено по умолчанию: с этими маршрутами программа и стартует"));
+        else if (answer.Kind == Views.RouteBoardKind.Reset) Journal.Add(Lang.T("маршруты сброшены: всем машинам АВТО, умолчаний нет"));
         AfterRouteChange();
     }
 
@@ -221,6 +258,9 @@ public partial class MainWindow
             // A machine that answered at its address proves the addresses are written right.
             if (row.Ok && row.Key is "base" or "laptop" or "home" or "dad" or "work") _proven["targets"] = DateTime.Now;
             _lanMs[row.Key] = row.Ok ? row.Ms : null;
+            // АВТО picks the VPS by these times (Sources.RouteName).
+            if (row.Ok && row.Ms is { } ms) Sources.RoadMs[row.Key] = ms;
+            else Sources.RoadMs.Remove(row.Key);
         }
         // No sign-in to Cloudflare Access: said once, until it appears.
         if (results.FirstOrDefault(r => r.Key == "cloud") is { } cloud)

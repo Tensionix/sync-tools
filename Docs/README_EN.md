@@ -97,8 +97,8 @@ the workstation `S:`.
 ## The window
 
 Two file panels are always visible, and the section strip at the top changes
-only what is open in them and which row of buttons is shown: SETUP, SSH KEYS,
-TUNNEL, REMOTE, STORAGE, CLOUDS and SETTINGS. On the right is the log, between
+only what is open in them and which row of buttons is shown: SSH KEYS, TUNNEL,
+REMOTE, STORAGE and CLOUDS; SETUP, SETTINGS and ABOUT are buttons at the top right. On the right is the log, between
 the panels a narrow strip of buttons, at the bottom the row of file operations
 with their keys. A local disk, a machine over ssh, an R2 bucket and a cloud are
 the same to the program: one `rclone` reads them all, and copying goes between

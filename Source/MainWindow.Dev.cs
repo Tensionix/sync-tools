@@ -19,6 +19,19 @@ namespace AudionSyncTools;
 /// </summary>
 public partial class MainWindow
 {
+    /// <summary>
+    /// AUDION_DEV_OFFSCREEN=1: the Debug copy opens far beyond the screen, and again once it is
+    /// shown - a check is not put in front of the owner; its pictures come from the window itself.
+    /// </summary>
+    void DevPlace()
+    {
+        if (Environment.GetEnvironmentVariable("AUDION_DEV_OFFSCREEN") != "1") return;
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        ShowInTaskbar = false;
+        Position = new PixelPoint(-30000, -30000);
+        Opened += (_, _) => Position = new PixelPoint(-30000, -30000);
+    }
+
     async void DevCrashLater()
     {
         await Task.Delay(50);
@@ -41,6 +54,44 @@ public partial class MainWindow
                     case "section": SetSection(value, openPanels: true); Lang.Walk(this); break;
                     case "act": Act(value, value); break;
                     case "settings": ToggleSettings(value != "off"); break;
+                    case "about": ToggleAbout(value != "off"); break;
+                    // The dialog open over the window: owned=picture:<file> draws it by itself, owned=close closes it.
+                    case "owned":
+                        if (OwnedWindows.Count == 0) { Journal.Add("[dev] owned: no dialog"); break; }
+                        if (value == "close") { OwnedWindows[^1].Close(); break; }
+                        if (value.StartsWith("picture:"))
+                        {
+                            var dialog = OwnedWindows[^1];
+                            double scale = dialog.RenderScaling;
+                            var size = new PixelSize((int)(dialog.Bounds.Width * scale), (int)(dialog.Bounds.Height * scale));
+                            using var shot = new Avalonia.Media.Imaging.RenderTargetBitmap(size, new Vector(96 * scale, 96 * scale));
+                            shot.Render(dialog);
+#pragma warning disable CS0618 // a check tool: the plain save is enough
+                            shot.Save(value["picture:".Length..]);
+#pragma warning restore CS0618
+                        }
+                        break;
+                    // A button of the markup by its x:Name, as a pointer presses it: a switch turns over first.
+                    case "click":
+                        if (this.FindControl<Control>(value) is { } pressed)
+                        {
+                            if (pressed is Avalonia.Controls.Primitives.ToggleButton toggle) toggle.IsChecked = toggle.IsChecked != true;
+                            pressed.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Avalonia.Controls.Button.ClickEvent));
+                        }
+                        else Journal.Add("[dev] click: no control " + value);
+                        break;
+                    // A picture of the window from the window itself - it may stand beyond the screen.
+                    case "picture":
+                    {
+                        double scale = RenderScaling;
+                        var size = new PixelSize((int)(Bounds.Width * scale), (int)(Bounds.Height * scale));
+                        using var picture = new Avalonia.Media.Imaging.RenderTargetBitmap(size, new Vector(96 * scale, 96 * scale));
+                        picture.Render(this);
+#pragma warning disable CS0618 // a check tool: the plain save is enough
+                        picture.Save(value);
+#pragma warning restore CS0618
+                        break;
+                    }
                     // The window of the first start as a release shows it; nothing is chosen or downloaded.
                     case "firststart":
                         _ = AskFirstStart(value != "tools", value == "folder" ? new System.Collections.Generic.List<string>() : CarriedTools.Select(tool => tool.Name).ToList(), act: false);

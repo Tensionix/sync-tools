@@ -16,8 +16,8 @@ using Ellipse = Avalonia.Controls.Shapes.Ellipse;
 namespace AudionSyncTools;
 
 /// <summary>
-/// SETTINGS: the rightmost of the section buttons, opened in place of the panels, as in Audion
-/// Disk Tools - the journal stays beside it, so what a check of the versions says is seen at once.
+/// SETTINGS and ABOUT: buttons at the top right, opened in place of the panels, as in Audion Disk
+/// Tools - the journal stays beside them, so what a check of the versions says is seen at once.
 /// Here lives what is set once and left alone: the data folder (it is chosen at the first start
 /// anyway), the tools the program carries with their versions and their update, the fonts and the
 /// look of the window, the folders. The same button, another section or Esc brings the panels back.
@@ -28,17 +28,33 @@ public partial class MainWindow
     ToggleButton? _settingsButton;
     Panel? _into;
 
-    void ToggleSettings(bool? open = null)
+    /// <summary>Which page stands in place of the panels while one is open: "settings" or "about".</summary>
+    string _page = "settings";
+
+    void ToggleSettings(bool? open = null) => ShowPage("settings", open);
+
+    void ToggleAbout(bool? open = null) => ShowPage("about", open);
+
+    /// <summary>
+    /// SETTINGS and ABOUT stand in place of the panels, one at a time: the button of the page that
+    /// stands closes it, the other one changes the page. Closing leaves the page as it was, so a
+    /// window built anew (another language, another data folder) brings back the same one.
+    /// </summary>
+    void ShowPage(string page, bool? open)
     {
-        _settingsOpen = open ?? !_settingsOpen;
-        if (_settingsButton is not null) _settingsButton.IsChecked = _settingsOpen;
+        bool show = open ?? !(_settingsOpen && _page == page);
+        if (show) _page = page;
+        _settingsOpen = show;
+        if (_settingsButton is not null) _settingsButton.IsChecked = _settingsOpen && _page == "settings";
+        AboutButton.IsChecked = _settingsOpen && _page == "about";
         foreach (var (name, button) in _sectionButtons) button.IsChecked = !_settingsOpen && name == _section;
         LeftPanel.IsVisible = RightPanel.IsVisible = MidScroll.IsVisible = MidSplitter.IsVisible = !_settingsOpen;
         // The row of big buttons belongs to a section of work; over the settings it would promise actions on panels that are not there.
         BarFrame.IsVisible = ActionRow.IsVisible = !_settingsOpen;
         SettingsHost.IsVisible = _settingsOpen;
-        if (_settingsOpen) FillSettings();
-        else _active.FocusList();
+        if (!_settingsOpen) _active.FocusList();
+        else if (_page == "about") FillAbout();
+        else FillSettings();
     }
 
     // ------------------------------------------------------------ blocks, as Disk Tools builds them
@@ -347,6 +363,7 @@ public partial class MainWindow
         catch { latest = new Dictionary<string, string>(); }
         var items = rows.Select(row => new UpdateItem(row.Id, row.Name, have.GetValueOrDefault(row.Id), latest.GetValueOrDefault(row.Id))).ToList();
         for (int i = 0; i < rows.Count; i++) ShowTool(rows[i], items[i], asking: false);
+        ShowUpdateDot(items);
         if (!say) return;
 
         Journal.Add("");
@@ -391,6 +408,82 @@ public partial class MainWindow
             tip = Lang.T(asking ? "Узнаю, какая версия доступна." : "Какая версия доступна, узнать не удалось: источник не ответил.");
         }
         ToolTip.SetTip(row.Row, tip);
+    }
+
+    IReadOnlyList<UpdateItem> _lastUpdates = Array.Empty<UpdateItem>();
+
+    /// <summary>
+    /// At the start: whether a tool the program carries has a newer version out. The dot on SETTINGS
+    /// says so without opening it; the makers are asked at most once in six hours (Core\Updates).
+    /// </summary>
+    async void CheckUpdatesQuietly()
+    {
+        try
+        {
+            var have = await Task.Run(Updates.Installed);
+            var latest = await Updates.LatestAsync(force: false);
+            ShowUpdateDot(Updates.Known.Select(known => new UpdateItem(known.Id, known.Name, have.GetValueOrDefault(known.Id), latest.GetValueOrDefault(known.Id))).ToList());
+        }
+        catch { }
+    }
+
+    /// <summary>The tangerine dot on SETTINGS and the hint of the button: which tools have a newer version out.</summary>
+    void ShowUpdateDot(IReadOnlyList<UpdateItem> items)
+    {
+        _lastUpdates = items;
+        var behind = items.Where(item => item.Newer == true)
+            .Select(item => item.Installed is null ? item.Name : $"{item.Name} {item.Installed} → {item.Latest}").ToList();
+        UpdateDot.IsVisible = behind.Count > 0;
+        ToolTip.SetTip(SettingsButton, behind.Count > 0
+            ? Lang.F("Есть новее: {0}. SETTINGS → ИНСТРУМЕНТЫ И ВЕРСИИ → ОБНОВИТЬ.", string.Join(", ", behind))
+            : Lang.T("Папка данных, инструменты и их обновление, редактор F4, вид окна."));
+    }
+
+    // ------------------------------------------------------------ ABOUT
+
+    /// <summary>ABOUT: the program, its folders, its documents and the page of its releases.</summary>
+    void FillAbout()
+    {
+        SettingsBody.Children.Clear();
+        _into = null;
+        Add(new TextBlock { Text = "ABOUT", FontWeight = FontWeight.SemiBold, FontSize = 16, Margin = new Thickness(0, 0, 0, 8) });
+
+        var columns = new Grid { ColumnDefinitions = new ColumnDefinitions("*,16,*") };
+        var left = new StackPanel { Spacing = 10 };
+        var right = new StackPanel { Spacing = 10 };
+        Grid.SetColumn(right, 2);
+        columns.Children.Add(left);
+        columns.Children.Add(right);
+        SettingsBody.Children.Add(columns);
+
+        Open(left, "AUDION SYNC TOOLS");
+        Note("Копия MAIN VPS на этой машине и всё, без чего она бесполезна: ключи, клиент туннеля, доступ к домашним машинам. Плюс снимок приватных архивов Build-стека в R2.");
+        Pair("Версия", Paths.Version);
+        Pair("Программа", Paths.Root);
+        Pair("Папка данных", DataRoot.Chosen ? DataRoot.Path_ : Lang.T("не выбрана"));
+        Row(
+            Action("ПАПКА ПРОГРАММЫ", "Открыть папку программы в проводнике.", () => Shell(Paths.Root)),
+            Action("ЛИЦЕНЗИИ", "Лицензии программы и того, что она везёт с собой: папка licenses.", () => Shell(Path.Combine(Paths.Root, "licenses"))));
+
+        Open(right, "ДОКУМЕНТЫ");
+        Row(
+            Action("РУКОВОДСТВО", "Руководство пользователя: Docs\\USER_GUIDE_RU.md или USER_GUIDE_EN.md - по языку окна.", () => OpenDoc("USER_GUIDE")),
+            Action("ИЗМЕНЕНИЯ", "Журнал изменений по версиям.", () => OpenDoc("CHANGELOG")),
+            Action("ВОССТАНОВЛЕНИЕ", "Как поднять машину после переустановки Windows.", () => OpenDoc("RESTORE")),
+            Action("README", "Что это за программа и с чего начать.", () => OpenDoc("README")));
+
+        Open(right, "ССЫЛКИ");
+        Row(Action("GITHUB", "Выпуски программы: github.com/Tensionix/sync-tools.", () => Shell("https://github.com/Tensionix/sync-tools/releases")));
+
+        Lang.Walk(SettingsHost);
+    }
+
+    /// <summary>A document of Docs in the language of the window.</summary>
+    static void OpenDoc(string name)
+    {
+        var file = Path.Combine(Paths.Root, "Docs", $"{name}_{(Lang.Code == "ru" ? "RU" : "EN")}.md");
+        if (File.Exists(file)) Shell(file);
+        else Journal.Add(Lang.F("[окно] нет файла: {0}", file));
     }
 
     /// <summary>UPDATE: the script of the engine, its output in the journal; the dots are read again when it ends.</summary>

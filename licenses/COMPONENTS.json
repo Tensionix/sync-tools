@@ -1,6 +1,6 @@
 {
   "schema": "audion.build_licenses.components.v1",
-  "generated_utc": "2026-10-15T23:23:22Z",
+  "generated_utc": "2026-10-18T12:25:53Z",
   "project_id": "audion-sync-tools",
   "project_name": "Audion Sync Tools",
   "scan_root": ".",
@@ -2228,7 +2228,7 @@
       "bundled": true,
       "optional_runtime": false,
       "provider": "",
-      "artifact_sha256": "cbd0f9999487339129c4b8e78bbb5fe1cf188a3a81354af6165718adb3d9ea5c",
+      "artifact_sha256": "cc01cfa37c0785d29f3e11be41123aac21536df67d3c1387f87198ab4fae4433",
       "artifact_path": "Tools/PeaZip/res/bin/7z/7z.dll; Tools/PeaZip/res/bin/7z/7z.exe; Tools/PeaZip/res/bin/7z/7z.sfx; Tools/PeaZip/res/bin/7z/7zCon.linux.sfx; Tools/PeaZip/res/bin/7z/7zCon.sfx; Tools/PeaZip/res/bin/7z/Codecs/brotli.dll; Tools/PeaZip/res/bin/7z/Codecs/flzma2.dll; Tools/PeaZip/res/bin/7z/Codecs/lizard.dll",
       "obligation_class": "weak_copyleft",
       "redistributable": true,

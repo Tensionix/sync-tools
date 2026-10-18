@@ -1,7 +1,7 @@
 # Audion Build Licenses Scan Report
 
 - Project: **Audion Sync Tools** (`audion-sync-tools`)
-- Run: `20261015T232321Z_audion-sync-tools_ace64d7b`
+- Run: `20261018T122552Z_audion-sync-tools_8eb9ef25`
 - Scan root (from the project root): `.`
 - Output (from the project root): `licenses`
 - Status: **PASS**
@@ -54,7 +54,7 @@ No issues detected.
 | Microsoft.Management.Infrastructure | `UNCHANGED` | 3.0.0 | 3.0.0 |
 | Microsoft.Management.Infrastructure.CimCmdlets | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.Management.Infrastructure.Runtime.Win | `UNCHANGED` | 3.0.0 | 3.0.0 |
-| Microsoft.NETCore.App.Runtime.win-x64 | `VERSION_OR_ARTIFACT_CHANGED_LICENSE_SAME` | 10.0.12 | 10.0.13 |
+| Microsoft.NETCore.App.Runtime.win-x64 | `UNCHANGED` | 10.0.13 | 10.0.13 |
 | Microsoft.PowerShell.Commands.Diagnostics | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.PowerShell.Commands.Management | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.PowerShell.Commands.Utility | `UNCHANGED` | 7.6.6 | 7.6.6 |
@@ -71,7 +71,7 @@ No issues detected.
 | Microsoft.WSMan.Management | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.WSMan.Runtime | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Newtonsoft.Json | `UNCHANGED` | 13.0.4 | 13.0.4 |
-| PeaZip | `UNCHANGED` | present-in-release | present-in-release |
+| PeaZip | `VERSION_OR_ARTIFACT_CHANGED_LICENSE_SAME` | present-in-release | present-in-release |
 | rclone | `UNCHANGED` | 1.75.2 | 1.75.2 |
 | runtime.native.System.Data.SqlClient.sni | `UNCHANGED` | 4.4.0 | 4.4.0 |
 | runtime.win-x64.runtime.native.System.Data.SqlClient.sni | `UNCHANGED` | 4.4.0 | 4.4.0 |
@@ -98,9 +98,9 @@ No issues detected.
 | System.Net.Http.WinHttpHandler | `UNCHANGED` | 10.0.5 | 10.0.5 |
 | System.Reflection.Context | `UNCHANGED` | 10.0.5 | 10.0.5 |
 | System.Runtime.Caching | `UNCHANGED` | 10.0.5 | 10.0.5 |
-| System.Security.Cryptography.Pkcs | `VERSION_OR_ARTIFACT_CHANGED_LICENSE_SAME` | 10.0.10 | 10.0.13 |
+| System.Security.Cryptography.Pkcs | `UNCHANGED` | 10.0.13 | 10.0.13 |
 | System.Security.Cryptography.ProtectedData | `UNCHANGED` | 10.0.5 | 10.0.5 |
-| System.Security.Cryptography.Xml | `VERSION_OR_ARTIFACT_CHANGED_LICENSE_SAME` | 10.0.10 | 10.0.13 |
+| System.Security.Cryptography.Xml | `UNCHANGED` | 10.0.13 | 10.0.13 |
 | System.Security.Permissions | `UNCHANGED` | 10.0.5 | 10.0.5 |
 | System.ServiceModel.Http | `UNCHANGED` | 10.0.652802 | 10.0.652802 |
 | System.ServiceModel.NetFramingBase | `UNCHANGED` | 10.0.652802 | 10.0.652802 |

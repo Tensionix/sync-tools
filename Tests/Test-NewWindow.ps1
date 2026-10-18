@@ -23,6 +23,8 @@
         облаками одного вида идёт на стороне облака, папка данных меняется
         одним шагом вместе со своей облачной сессией и панелями, -Root в
         командной строке окна называет папку данных, номер версии один;
+      - окно первого запуска отдаёт ответ, когда его уже нет среди окон
+        программы: иначе выбранную в нём папку данных окно отклоняет;
       - действие, которое ждёт подсчёта или ответа, держит папку данных
         (Pending) и идёт по адресу, взятому до вопроса, а не туда, где панель
         оказалась после него; у каждого метода с await либо то, либо причина
@@ -288,6 +290,7 @@ $free = [ordered]@{
     'FirstStart'        = 'окно первого запуска: само ведёт к выбору папки данных'
     'AskFirstStart'     = 'окно первого запуска: само ведёт к выбору папки данных'
     'PickDataFolder'    = 'выбор папки данных'
+    'CheckUpdatesQuietly' = 'версии инструментов при старте: от папки данных не зависят, рисуют только точку на SETTINGS'
     'ChooseDataFolder'  = 'сама смена папки данных'
     'PrepareData'       = 'подготовка папки данных: ответ сверяется с папкой'
     'PrepareAtStart'    = 'подготовка папки данных при старте'
@@ -379,6 +382,15 @@ Test-Step -Title 'ответ о прежней папке в новую не л�
          ([string]$waiting['ShowState']) -match 'string\.Equals\(root, DataRoot\.Path_[^)]*\)\)\s*\{\s*if \(_summaryAsked\) ShowState\(\);\s*return;' -and
          $choose.Contains('_proven.Clear();') -and $choose.Contains('Sources.LanUp.Clear();') -and $choose.Contains('_setup = _beacon = null;')) `
     -Note 'проба, состояние и сводка сверяют папку; смена папки забывает узнанное о прежней'
+
+# Окно первого запуска отдаёт ответ, когда его уже нет среди окон программы. На Windows код после
+# await ShowDialog идёт, пока владелец ещё числит диалог своим (Avalonia убирает его после Closed),
+# и ChooseDataFolder отклонял выбранную папку как «идёт операция» (18.10.2026). Стенд без экрана
+# этого не видит: там диалог уходит раньше.
+$firstStart = Get-Content -LiteralPath (Join-Path $source 'Views\FirstStartDialog.cs') -Raw -Encoding UTF8
+Test-Step -Title 'ответ окна первого запуска - после ухода диалога' `
+    -Ok ($firstStart -match 'await dialog\.ShowDialog\(owner\);\s*(//[^\n]*\n\s*)*await Task\.Yield\(\);\s*return result;') `
+    -Note 'FirstStartDialog.Ask: await Task.Yield() после ShowDialog'
 
 Write-Host ''
 if ($failed) {

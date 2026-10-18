@@ -4,6 +4,7 @@
 
 **Contents**
 
+- [2.2.0 — 18 October 2026](#220--18-october-2026)
 - [2.0.1 — 15 October 2026](#201--15-october-2026)
 - [2.0.0 — 9 October 2026](#200--9-october-2026)
 - [1.19.2 — 26 September 2026](#1192--26-september-2026)
@@ -57,6 +58,29 @@
 - [1.2.0 — 5 September 2026](#120--5-september-2026)
 - [1.1.0 — 5 September 2026](#110--5-september-2026)
 - [1.0.0 — 5 September 2026](#100--5-september-2026)
+
+## 2.2.0 — 18 October 2026
+
+**SETUP, SETTINGS and ABOUT at the top right.** The three buttons stand before the choice of the language and
+the theme; the row of sections keeps SSH KEYS, TUNNEL, REMOTE, STORAGE and CLOUDS. A tangerine dot lights on
+`SETTINGS` when a newer version of a tool the program carries is out; the hint of the button names which.
+`ABOUT` shows the version, the folder of the program and the data folder, and opens the documents, the folder
+of licenses and the page of releases.
+
+**AUTO picks the VPS by its delay.** From afar `AUTO` takes the VPS that answers the probe faster: MAIN VPS by its
+name or SECOND VPS. Less than a tenth apart is no difference, and MAIN VPS comes first then. The route over
+cloudflared comes after the timed ones. At home — the home network, as before.
+
+**The routes per machine — with a kebab in the ROUTE row.** The kebab `⋮` at the end of the row opens the routes per
+machine with the time to the nearest node: `APPLY` — until the program is closed, `MAKE DEFAULT` — for the starts to
+come as well, `RESET` — `AUTO` for every machine with no defaults. A tangerine dot on the kebab says the routes are
+not the defaults. A choice made with the buttons of the row is no longer remembered until the next start: the one
+remembered before became the default.
+
+**The window of the first start chooses the data folder.** The folder picked in it with OK was refused with
+the journal line "an operation is running: the data folder is changed after it", and the program stayed
+without a data folder: the panels of the machines empty, no indication. Choosing through SETTINGS → DATA
+FOLDER → CHOOSE worked before as well.
 
 ## 2.0.1 — 15 October 2026
 

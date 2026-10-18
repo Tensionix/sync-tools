@@ -26,6 +26,7 @@ public sealed class Settings
     public int Streams { get; set; } = 8;
     public string PinnedMode { get; set; } = "";
     /// <summary>The route chosen by hand per machine; empty - the probe decides.</summary>
+    /// <summary>The roads the window starts with, per machine: saved by СДЕЛАТЬ ПО УМОЛЧАНИЮ of the board of routes, cleared by СБРОСИТЬ; none - АВТО.</summary>
     public Dictionary<string, string> Routes { get; set; } = new();
 
     // The window on the screen.

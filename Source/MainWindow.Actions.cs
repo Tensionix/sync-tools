@@ -297,6 +297,7 @@ public partial class MainWindow
         // What the window learnt about the old folder is not known about the new one: which roads
         // answered, what was proven by a panel read through it, what its dots said. As at a start.
         Sources.LanUp.Clear();
+        Sources.RoadMs.Clear();
         Sources.RouteFail.Clear();
         _lanMs.Clear();
         _proven.Clear();
@@ -310,7 +311,7 @@ public partial class MainWindow
         // Left as they were, ДАННЫЕ went on showing the old folder under the badge of the new one.
         _opened = false;
         SetSection(_section, openPanels: true);
-        if (settings) ToggleSettings(true);
+        if (settings) ShowPage(_page, true);
 
         // The folder was changed once more meanwhile: the rest is for the step that did it.
         await saved;

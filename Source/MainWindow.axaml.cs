@@ -42,9 +42,13 @@ public partial class MainWindow : Window
         _settings = settings;
         InitializeComponent();
         _active = LeftPanel;
+#if DEBUG
+        DevPlace();
+#endif
 
         if (settings.Width >= MinWidth && settings.Height >= MinHeight) { Width = settings.Width; Height = settings.Height; }
-        Sources.Picked = settings.Routes;
+        // The roads of this session start as the saved defaults; the row and its board change the copy only.
+        Sources.Picked = new Dictionary<string, string>(settings.Routes);
         FilePanel.Palette = RowPalette.Load(settings.Look);
         App.SetFontStep(settings.FontStep);
 
@@ -123,7 +127,7 @@ public partial class MainWindow : Window
             Sources.Rebuild();
             bool settings = _settingsOpen;
             SetSection(_section, openPanels: false);
-            if (settings) ToggleSettings(true);
+            if (settings) ShowPage(_page, true);
             LeftPanel.ReloadNow();
             RightPanel.ReloadNow();
             RefreshState();
@@ -153,6 +157,7 @@ public partial class MainWindow : Window
         RefreshState();
         ShowState();
         PrepareAtStart();
+        CheckUpdatesQuietly();
 #if DEBUG
         // A check without a mouse: a modal question would hold every script of steps. The step
         // "firststart" shows the window on demand; without a script the Debug copy asks as a release does.
@@ -170,7 +175,6 @@ public partial class MainWindow : Window
     void SaveWindow()
     {
         if (WindowState == WindowState.Normal) { _settings.Width = Width; _settings.Height = Height; }
-        _settings.Routes = Sources.Picked;
         _settings.Save();
     }
 
@@ -180,6 +184,13 @@ public partial class MainWindow : Window
     {
         foreach (var section in Sources.Sections)
         {
+            // SETUP is done once and seldom: its button stands at the top right with SETTINGS and ABOUT.
+            if (section.Key == "setup")
+            {
+                SetupButton.Click += (_, _) => SetSection("setup", openPanels: true);
+                _sectionButtons[section.Key] = SetupButton;
+                continue;
+            }
             var button = new ToggleButton
             {
                 Classes = { "switch", "section" },
@@ -197,21 +208,11 @@ public partial class MainWindow : Window
             SectionRow.Children.Add(button);
             _sectionButtons[section.Key] = button;
         }
-        // SETTINGS closes the row, the rightmost: no section of work - what is set once and left alone.
-        _settingsButton = new ToggleButton
-        {
-            Classes = { "switch", "section" },
-            Content = new StackPanel
-            {
-                Children =
-                {
-                    new TextBlock { Text = "SETTINGS", HorizontalAlignment = HorizontalAlignment.Center },
-                    new TextBlock { Text = "окно и инструменты", Classes = { "hint" } },
-                },
-            },
-        };
-        _settingsButton.Click += (_, _) => ToggleSettings();
-        SectionRow.Children.Add(_settingsButton);
+        // SETTINGS and ABOUT are no sections of work - what is set once and left alone, and the program
+        // itself: they stand at the top right, before the language and the look (the owner, 18.10.2026).
+        _settingsButton = SettingsButton;
+        SettingsButton.Click += (_, _) => ToggleSettings();
+        AboutButton.Click += (_, _) => ToggleAbout();
     }
 
     sealed class BarItem
@@ -458,7 +459,8 @@ public partial class MainWindow : Window
         LeftPanel.Refresh();
         RightPanel.Refresh();
         UpdateDataBadge();
-        if (settings) ToggleSettings(true);
+        if (settings) ShowPage(_page, true);
+        ShowUpdateDot(_lastUpdates);
         Title = BaseTitle;
         ShowProbeSummary();
     }

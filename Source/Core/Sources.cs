@@ -134,6 +134,9 @@ public static class Sources
     /// <summary>The route picked by hand per machine ("home", "direct", "cf", "via"); empty - the probe decides.</summary>
     public static Dictionary<string, string> Picked { get; set; } = new();
 
+    /// <summary>What the probe measured last: the name of a probe -> milliseconds to its node; a silent node has none.</summary>
+    public static Dictionary<string, double> RoadMs { get; } = new();
+
     static string Has(string remote) => Rclone.Configured(remote) ? remote : "";
 
     /// <summary>
@@ -164,15 +167,18 @@ public static class Sources
         bool cloudUp = !LanUp.TryGetValue("cloud", out var c) || c;
         bool serverUp = LanUp.TryGetValue("direct", out var d) && d;
         bool Fresh(string route) => !RouteFail.TryGetValue(key + "|" + route, out var stamp) || (DateTime.Now - stamp).TotalMinutes > 15;
+        bool secondUp = !LanUp.TryGetValue("second", out var s2) || s2;
 
-        // The speed of both far roads is the same (1.65 MiB/s measured), but a session by the
-        // straight name stands up twice as fast: 1.7 s against 2.8. So the straight jump is first,
-        // and that is no risk: the probe knocks at the address itself, and the day it is blocked
-        // the window goes to cloudflared, which has no open port to block. SECOND VPS is last:
-        // shorter by geography, but its ssh is cut exactly where everything else is cut already.
-        if (serverUp && (ssh.Length > 0 || direct.Length > 0) && Fresh(RouteMain)) return RouteMain;
-        if (cloudUp && cf.Length > 0 && Fresh(RouteCf)) return RouteCf;
-        if (via.Length > 0 && Fresh(RouteVia)) return RouteVia;
+        // The VPS that answers faster goes first (the owner, 18.10.2026: «Делаем выбор VPS по задержке»): the
+        // time of MAIN VPS by its name against the time of SECOND VPS, each knocked at the server itself.
+        // Cloudflared has no time of its own to set against them - its probe reaches the edge of Cloudflare,
+        // not MAIN VPS - so it stays after MAIN VPS by name (a session by the name stands up faster: 1.7 s
+        // against 2.8) and after every road with a time.
+        var roads = new List<(string Road, double? Ms)>();
+        if (serverUp && (ssh.Length > 0 || direct.Length > 0) && Fresh(RouteMain)) roads.Add((RouteMain, RoadMs.TryGetValue("direct", out var main) ? main : null));
+        if (cloudUp && cf.Length > 0 && Fresh(RouteCf)) roads.Add((RouteCf, null));
+        if (secondUp && via.Length > 0 && Fresh(RouteVia)) roads.Add((RouteVia, RoadMs.TryGetValue("second", out var second) ? second : null));
+        if (Fastest(roads) is { Length: > 0 } fastest) return fastest;
 
         // Every route is marked failed: take the one that usually lives longest and try again -
         // better to wait than not to go at all.
@@ -180,6 +186,24 @@ public static class Sources
         if (ssh.Length > 0 || direct.Length > 0) return RouteMain;
         if (cf.Length > 0) return RouteCf;
         return "";
+    }
+
+    /// <summary>
+    /// The first of the far roads by time: those with a time by their milliseconds, the rest after them
+    /// in their own order. Times within a tenth of each other (or 5 ms) are equal and the order decides -
+    /// MAIN VPS first: a road does not swing between two probes over a few milliseconds.
+    /// </summary>
+    public static string Fastest(IReadOnlyList<(string Road, double? Ms)> roads)
+    {
+        string best = "";
+        double? bestMs = null;
+        foreach (var (road, ms) in roads)
+        {
+            if (best.Length == 0) { best = road; bestMs = ms; continue; }
+            if (ms is null) continue;
+            if (bestMs is null || ms < bestMs - Math.Max(5, bestMs.Value / 10)) { best = road; bestMs = ms; }
+        }
+        return best;
     }
 
     /// <summary>

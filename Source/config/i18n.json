@@ -1865,8 +1865,8 @@
  "адрес не вписан": {
   "en": "no address written in"
  },
- "Маршрут выбирает проба, и для каждой машины отдельно.": {
-  "en": "The probe picks the route, separately for each machine."
+ "Маршрут выбирает проба, для каждой машины отдельно: дома - домашняя сеть, издалека - VPS, который отвечает быстрее.": {
+  "en": "The probe picks the route, for each machine on its own: at home - the home network, from afar - the VPS that answers faster."
  },
  "Тот же MAIN VPS поверх cloudflared: выглядит обычным HTTPS.": {
   "en": "The same MAIN VPS over cloudflared: it looks like ordinary HTTPS."
@@ -2864,8 +2864,8 @@
  "МАРШРУТЫ ДО BASE": {
   "en": "ROUTES TO BASE"
  },
- "Маршрут выбирает проба: дома - по домашней сети, издалека - через MAIN VPS по имени, затем поверх cloudflared, затем через SECOND VPS.": {
-  "en": "The probe picks the route: at home - over the home network, from afar - through MAIN VPS by its name, then over cloudflared, then through SECOND VPS."
+ "Маршрут выбирает проба: дома - по домашней сети, издалека - VPS, который отвечает быстрее: MAIN VPS по имени или SECOND VPS; молчит - следующий.": {
+  "en": "The probe picks the route: at home - over the home network, from afar - the VPS that answers faster: MAIN VPS by its name or SECOND VPS; silent - the next one."
  },
  "На уровень выше (Backspace).": {
   "en": "One level up (Backspace)."
@@ -4147,5 +4147,92 @@
  },
  "объект остался под временным именем «{0}»: имя ему возвращает F2": {
   "en": "the object is left under the temporary name “{0}”: F2 gives it a name back"
+ },
+ "Первая настройка машины: адреса, ключи, SSHD, SSH TUN, RESTORE, RCLONE.CONF.": {
+  "en": "The first setup of the machine: addresses, keys, SSHD, SSH TUN, RESTORE, RCLONE.CONF."
+ },
+ "Папка данных, инструменты и их обновление, редактор F4, вид окна.": {
+  "en": "The data folder, the tools and their update, the editor of F4, the look of the window."
+ },
+ "О программе: версия, папки, документы, ссылки.": {
+  "en": "About the program: the version, the folders, the documents, the links."
+ },
+ "Есть новее: {0}. SETTINGS → ИНСТРУМЕНТЫ И ВЕРСИИ → ОБНОВИТЬ.": {
+  "en": "Newer ones are out: {0}. SETTINGS → TOOLS AND VERSIONS → UPDATE."
+ },
+ "Копия MAIN VPS на этой машине и всё, без чего она бесполезна: ключи, клиент туннеля, доступ к домашним машинам. Плюс снимок приватных архивов Build-стека в R2.": {
+  "en": "A copy of MAIN VPS on this machine and everything it is useless without: the keys, the tunnel client, the access to the home machines. Plus a snapshot of the private archives of the Build stack in R2."
+ },
+ "Версия": {
+  "en": "Version"
+ },
+ "Папка данных": {
+  "en": "Data folder"
+ },
+ "ПАПКА ПРОГРАММЫ": {
+  "en": "PROGRAM FOLDER"
+ },
+ "ЛИЦЕНЗИИ": {
+  "en": "LICENSES"
+ },
+ "Лицензии программы и того, что она везёт с собой: папка licenses.": {
+  "en": "The licenses of the program and of what it carries: the licenses folder."
+ },
+ "ДОКУМЕНТЫ": {
+  "en": "DOCUMENTS"
+ },
+ "РУКОВОДСТВО": {
+  "en": "USER GUIDE"
+ },
+ "Руководство пользователя: Docs\\USER_GUIDE_RU.md или USER_GUIDE_EN.md - по языку окна.": {
+  "en": "The user guide: Docs\\USER_GUIDE_RU.md or USER_GUIDE_EN.md - by the language of the window."
+ },
+ "ИЗМЕНЕНИЯ": {
+  "en": "CHANGES"
+ },
+ "Журнал изменений по версиям.": {
+  "en": "The changelog, version by version."
+ },
+ "ВОССТАНОВЛЕНИЕ": {
+  "en": "RESTORE"
+ },
+ "Как поднять машину после переустановки Windows.": {
+  "en": "How to bring a machine back after Windows is reinstalled."
+ },
+ "Что это за программа и с чего начать.": {
+  "en": "What the program is and where to start."
+ },
+ "ССЫЛКИ": {
+  "en": "LINKS"
+ },
+ "Выпуски программы: github.com/Tensionix/sync-tools.": {
+  "en": "The releases of the program: github.com/Tensionix/sync-tools."
+ },
+ "Маршруты по машинам: у каждой машины свой, с замером до ближайшего узла. Выбор - на этот сеанс или по умолчанию, для следующих запусков. Оранжевая точка: маршруты сейчас не те, что по умолчанию.": {
+  "en": "The routes per machine: each machine its own, with the time to the nearest node. The choice - for this session or as the default for the starts to come. A tangerine dot: the routes now are not the defaults."
+ },
+ "АВТО издалека берёт VPS, который отвечает быстрее: MAIN VPS по имени или SECOND VPS; разница меньше десятой доли - не разница.": {
+  "en": "AUTO from afar takes the VPS that answers faster: MAIN VPS by its name or SECOND VPS; less than a tenth apart is no difference."
+ },
+ "СДЕЛАТЬ ПО УМОЛЧАНИЮ": {
+  "en": "MAKE DEFAULT"
+ },
+ "Всем машинам АВТО, сохранённые умолчания стираются - как в только что распакованной программе.": {
+  "en": "AUTO for every machine, the saved defaults are wiped - as in a program unpacked a moment ago."
+ },
+ "ПРИМЕНИТЬ - до закрытия программы; СДЕЛАТЬ ПО УМОЛЧАНИЮ - и для следующих запусков; СБРОСИТЬ - всем машинам АВТО, как в новой программе.": {
+  "en": "APPLY - until the program is closed; MAKE DEFAULT - for the starts to come as well; RESET - AUTO for every machine, as in a fresh program."
+ },
+ "СБРОСИТЬ": {
+  "en": "RESET"
+ },
+ "Эти маршруты - и на сеанс, и по умолчанию: с ними программа стартует в следующий раз.": {
+  "en": "These routes - for this session and as the default: the program starts with them next time."
+ },
+ "сохранено по умолчанию: с этими маршрутами программа и стартует": {
+  "en": "saved as the default: the program starts with these routes"
+ },
+ "маршруты сброшены: всем машинам АВТО, умолчаний нет": {
+  "en": "the routes are reset: AUTO for every machine, no defaults"
  }
 }
