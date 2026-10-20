@@ -4,6 +4,7 @@
 
 **Contents**
 
+- [2.3.1 — 20 October 2026](#231--20-october-2026)
 - [2.2.0 — 18 October 2026](#220--18-october-2026)
 - [2.0.1 — 15 October 2026](#201--15-october-2026)
 - [2.0.0 — 9 October 2026](#200--9-october-2026)
@@ -58,6 +59,28 @@
 - [1.2.0 — 5 September 2026](#120--5-september-2026)
 - [1.1.0 — 5 September 2026](#110--5-september-2026)
 - [1.0.0 — 5 September 2026](#100--5-september-2026)
+
+## 2.3.1 — 20 October 2026
+
+**The probe tries again by itself.** When nobody answers the probe — the program started before the network was up, or
+a VPN is still connecting — it is tried again in 20 seconds, up to three times in a row. When the network changes (a VPN
+came up, another Wi-Fi) the window waits for it to settle and probes again. Before, the probe line kept `none` at every
+route until PORT 22 TCP PING was pressed.
+
+**The probe line fits.** With SETUP, SETTINGS and ABOUT in the top row it was cut with an ellipsis. The way now follows an
+arrow, and "(by probe)" is not written — only `chosen` and `by machine` stay in brackets. The whole line is in the
+tooltip.
+
+**Space counts the size of a folder.** As in Total Commander: Space on a folder marks it and counts how much it takes —
+by the disk on this machine, through `rclone size` on a far side. While it counts, the column SIZE shows "…", then the
+number; it goes into the sum "MARKED" under the panel. "?" — the count had no answer, Space on the folder counts again.
+Two folders are counted at a time, the rest wait; leaving the folder stops the counts begun. Insert marks without
+counting; drives in the list of drives are not counted by Space. The exact bytes of a row are still Shift+Space.
+
+**The translucency by default is ACRYLIC in the file panels.** A fresh copy of the program opens with `ACRYLIC` and
+"File panels only": the background of the file lists is blurred, the top line, the buttons and the gaps stay solid. A
+choice already saved in SETTINGS → TRANSLUCENCY stays as it was; with the transparency effects of Windows switched off
+the window is solid.
 
 ## 2.2.0 — 18 October 2026
 

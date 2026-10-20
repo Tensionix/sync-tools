@@ -8,15 +8,14 @@
   <a href="https://github.com/Tensionix/sync-tools/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Tensionix/sync-tools?style=flat-square&color=5fd08a&logo=apache&logoColor=white&cacheSeconds=3600"></a>
 </p>
 
-**Version 2.3.1** · 2026-10-20 · 78.3 MB
+**Version 2.3.1** · 2026-10-20 · 148.7 MB
 
-- [Direct download](https://dl.audion.dev/sync-tools/2.3.1/Audion_Sync_Tools_v2.3.1.zip) — unmetered, no rate limits
+- [Direct download](https://audion.dev/get/sync-tools/2.3.1/Audion_Sync_Tools_v2.3.1_Full.zip) — unmetered, no rate limits
 - [Project page](https://audion.dev/downloads/sync-tools) — every version and how to install
-- [GitHub release](https://github.com/Tensionix/sync-tools/releases/tag/v2.3.1)
 
 <p align="center"><img src="Docs/screenshot.png" alt="The program window" width="560"></p>
 
-`SHA-256: f97a5af8bc22f2d125d4681c02ecfc2ed878d1235921bec557fef107c45b93af`
+`SHA-256: 01344c26eabc72fce491888a1825a2e108c461080ad9b55d47a94f7ab26756db`
 
 ---
 
@@ -148,8 +147,8 @@ yet has a grey indicator, and a press says so in words. MAIN VPS stands in the
 panels beside the home machines and the R2 bucket: a file travels between the
 R2 bucket and MAIN VPS directly, with no scp and no console.
 
-The keys are those of a file manager: Space marks, Enter goes in, Backspace
-goes a level up, Tab moves to the other panel. F2 — rename, F3 — public links
+The keys are those of a file manager: Space marks and counts the size of a
+folder, Enter goes in, Backspace goes a level up, Tab moves to the other panel. F2 — rename, F3 — public links
 to what is marked in the R2 bucket, F4 — the editor, F5 and F6 — copy and move,
 F7 — a folder, F8 — delete. F11 adds what is missing to the other panel, F12
 makes it an exact copy of the active one. Alt+F5 and Alt+F9 pack and unpack

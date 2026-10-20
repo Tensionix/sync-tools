@@ -319,7 +319,8 @@ copying and synchronisation, the other one the destination; a panel becomes
 active on any touch, and Tab moves the cursor into the other one.
 
 **Marks.** A marked row gets an orange dot in the narrow first column. Space or
-Insert marks the row and moves the cursor down, Ctrl+A marks everything — and
+Insert marks the row and moves the cursor down, Space on a folder also counts its
+size (below, "Sizes"), Ctrl+A marks everything — and
 with everything marked takes the marks off — and `*` of the numeric keypad
 inverts the marks. The mask window marks by masks. File operations take what is
 marked, and with no marks — the row under the cursor.
@@ -328,7 +329,12 @@ marked, and with no marks — the row under the cursor.
 narrows the list by name. Esc takes the filter away.
 
 **Sizes.** The column shows KB, MB and GB or exact bytes — the switch is in
-SETTINGS. Shift+Space counts the exact size of the row under the cursor, a
+SETTINGS. Space, marking a folder, counts its size, as in Total Commander: while
+it counts the column shows "…", then the number, and it goes into the sum
+"MARKED" under the panel. "?" — the count had no answer, Space on the folder
+counts again. Two folders are counted at a time, leaving the folder stops the
+counts begun; drives in the list of drives are not counted, Insert marks without
+counting. Shift+Space counts the exact size of the row under the cursor, a
 folder too: by the disk on this machine, through `rclone size` on a far side.
 The answer stands in the status line of the panel.
 
@@ -363,7 +369,8 @@ From top to bottom:
 | Backspace | one level up |
 | Alt+← and Alt+→ | back and forward through the history of the panel |
 | Home, End | to the start and the end of the list |
-| Space, Insert | mark the row and move the cursor down |
+| Space | mark the row and move the cursor down; a folder — and count its size |
+| Insert | mark the row and move the cursor down |
 | Ctrl+A | mark everything; with everything marked — unmark |
 | `*` of the numeric keypad | invert the marks |
 | Shift+Space | the exact size of the row under the cursor |
@@ -611,11 +618,17 @@ give each machine a route of its own.
 The line in the middle of the header says what is reachable and where the window
 will go:
 
-    probe 18:03 · BASE 1 ms · MAIN VPS 90 ms · MAIN VPS CF 57 ms · SECOND VPS 45 ms · route: LAN (by probe)
+    probe 18:03 · BASE 1 ms · MAIN VPS 90 ms · MAIN VPS CF 57 ms · SECOND VPS 45 ms → LAN
 
-The word `none` in place of a time means the route is silent. The brackets say
-who chose the way: `by probe`, `chosen` — with a `ROUTE` button, `by machine` —
-each has its own.
+The word `none` in place of a time means the route is silent. After the arrow is
+the way of the window; when the probe did not choose it, the brackets say who
+did: `chosen` — with a `ROUTE` button, `by machine` — each has its own. The
+whole line is in the tooltip.
+
+When nobody answers — the program started before the network was up, or a VPN
+is still connecting — the probe is tried again in 20 seconds, up to three times
+in a row. When the network changes (a VPN came up, another Wi-Fi) the window
+waits for it to settle and probes again.
 
 An answer means the port is open, not that the protocol will pass. Filtered
 networks cut ssh after the connection is made, and the probe does not see that.
@@ -697,7 +710,8 @@ button means a newer version of a tool is out; the hint of the button names whic
 - **FONT** — `SMALLER`, `NORMAL`, `LARGER`, and the fonts themselves: one for the
   program, another for the panels and the log.
 - **TRANSLUCENCY** — the effects of Windows 11: `ACRYLIC`, `MICA` or a solid
-  window, and three densities of the background. With the effects switched off
+  window, and three densities of the background; by default — `ACRYLIC` in the
+  file panels only. With the effects switched off
   in the system the window stays solid.
 - **SIZES** — `SHORT` (KB, MB, GB) or `IN BYTES`: a few bytes of difference
   between two folders show another version.

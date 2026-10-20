@@ -1200,6 +1200,69 @@ static class Stand
             Close(window);
         }
 
+        // ------------------------------------------------------------ Space counts a folder
+        // Space on a folder, as in Total Commander: the folder is marked and its size counted; the
+        // number stands in the column РАЗМЕР and in ОТМЕЧЕНО. Insert only marks. A drive of the list
+        // of drives is marked but not counted - that would be the whole disk.
+        {
+            Home();
+            var root = InStand("space-size");
+            Directory.CreateDirectory(Path.Combine(root, "inner", "deep"));
+            Directory.CreateDirectory(Path.Combine(root, "other"));
+            File.WriteAllBytes(Path.Combine(root, "inner", "a.bin"), new byte[3000]);
+            File.WriteAllBytes(Path.Combine(root, "inner", "deep", "b.bin"), new byte[5000]);
+            File.WriteAllBytes(Path.Combine(root, "other", "c.bin"), new byte[700]);
+            File.WriteAllBytes(Path.Combine(root, "file.bin"), new byte[1000]);
+            var window = Window();
+            var left = window.FindControl<FilePanel>("LeftPanel")!;
+            left.Open("local", root);
+            bool read = Until(() => left.Rows.Count == 3);
+            var list = left.FindControl<DataGrid>("List")!;
+            void Press(Key key, string name)
+            {
+                list.SelectedItem = left.Rows.First(r => r.Name == name); Pump(30);
+                list.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = key, Source = list });
+                Pump(30);
+            }
+            Press(Key.Space, "inner");
+            var inner = left.Rows.First(r => r.Name == "inner");
+            bool counted = Until(() => inner.Counted == 8000);
+            Pump(100);
+            // The cell itself: the binding of the column follows the row.
+            bool column = inner.Checked && inner.SizeText == Format.Size(8000) && list.GetVisualDescendants().OfType<TextBlock>().Any(text => text.Text == Format.Size(8000));
+            Press(Key.Space, "file.bin");
+            Press(Key.Insert, "other");
+            var other = left.Rows.First(r => r.Name == "other");
+            Pump(300);
+            bool insertOnly = other.Checked && other.Counted == -1 && other.SizeText == "";
+            var status = left.StatusText;
+            bool summed = status.Contains(Lang.F("ОТМЕЧЕНО: {0} · {1}", 3, Format.Size(9000)));
+            // Space again takes the mark off; the number stays - it was counted.
+            Press(Key.Space, "inner");
+            bool unmarked = !inner.Checked && inner.SizeText == Format.Size(8000);
+            left.Open("local", "");
+            bool drives = Until(() => left.Rows.Count > 0);
+            var drive = drives ? left.Rows[0] : null;
+            if (drive != null) Press(Key.Space, drive.Name);
+            Pump(300);
+            bool driveLeft = drive != null && drive.Checked && !drive.Counting && drive.Counted == -1;
+            Verdict("пробел на папке отмечает её и считает размер, Insert только отмечает, диск не считается",
+                read && counted && column && insertOnly && summed && unmarked && driveLeft,
+                new { read, counted, inner = inner.Counted, column = inner.SizeText, insertOnly, other = other.Counted, status, summed, unmarked, driveLeft, drive = drive?.Name, driveCounted = drive?.Counted });
+            Close(window);
+            Directory.Delete(root, true);
+        }
+
+        // ------------------------------------------------------------ the backdrop of a fresh copy
+        // A fresh copy opens with ACRYLIC in the file panels; a choice saved in the settings stays.
+        {
+            var fresh = new Settings();
+            var saved = JsonSerializer.Deserialize<Settings>("{\"Backdrop\": \"\", \"BackdropPanelsOnly\": false}")!;
+            Verdict("свежие настройки: ACRYLIC только в файловых панелях, сохранённый выбор остаётся",
+                fresh.Backdrop == "acrylic" && fresh.BackdropPanelsOnly && saved.Backdrop == "" && !saved.BackdropPanelsOnly,
+                new { fresh = fresh.Backdrop, panels = fresh.BackdropPanelsOnly, saved = saved.Backdrop, savedPanels = saved.BackdropPanelsOnly });
+        }
+
         Home();
         Rclone.StopAll();
         Pump(150);

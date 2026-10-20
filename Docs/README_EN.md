@@ -124,8 +124,8 @@ yet has a grey indicator, and a press says so in words. MAIN VPS stands in the
 panels beside the home machines and the R2 bucket: a file travels between the
 R2 bucket and MAIN VPS directly, with no scp and no console.
 
-The keys are those of a file manager: Space marks, Enter goes in, Backspace
-goes a level up, Tab moves to the other panel. F2 — rename, F3 — public links
+The keys are those of a file manager: Space marks and counts the size of a
+folder, Enter goes in, Backspace goes a level up, Tab moves to the other panel. F2 — rename, F3 — public links
 to what is marked in the R2 bucket, F4 — the editor, F5 and F6 — copy and move,
 F7 — a folder, F8 — delete. F11 adds what is missing to the other panel, F12
 makes it an exact copy of the active one. Alt+F5 and Alt+F9 pack and unpack

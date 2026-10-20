@@ -1,7 +1,7 @@
 # Audion Build Licenses Scan Report
 
 - Project: **Audion Sync Tools** (`audion-sync-tools`)
-- Run: `20261018T122552Z_audion-sync-tools_8eb9ef25`
+- Run: `20261020T095641Z_audion-sync-tools_cf3c4aef`
 - Scan root (from the project root): `.`
 - Output (from the project root): `licenses`
 - Status: **PASS**
@@ -71,7 +71,7 @@ No issues detected.
 | Microsoft.WSMan.Management | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.WSMan.Runtime | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Newtonsoft.Json | `UNCHANGED` | 13.0.4 | 13.0.4 |
-| PeaZip | `VERSION_OR_ARTIFACT_CHANGED_LICENSE_SAME` | present-in-release | present-in-release |
+| PeaZip | `UNCHANGED` | present-in-release | present-in-release |
 | rclone | `UNCHANGED` | 1.75.2 | 1.75.2 |
 | runtime.native.System.Data.SqlClient.sni | `UNCHANGED` | 4.4.0 | 4.4.0 |
 | runtime.win-x64.runtime.native.System.Data.SqlClient.sni | `UNCHANGED` | 4.4.0 | 4.4.0 |

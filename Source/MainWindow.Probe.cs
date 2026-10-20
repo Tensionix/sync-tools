@@ -5,11 +5,13 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
+using Avalonia.Threading;
 using AudionSyncTools.Core;
 
 namespace AudionSyncTools;
@@ -25,6 +27,28 @@ public partial class MainWindow
     string _probeStamp = "";
     bool _probing, _probeAsked;
     bool _accessWarned;
+
+    // A probe nobody answered is tried again a little later, three times at most in a row: the program may start before
+    // the network is up (with Windows, or while a VPN connects) - the owner, 20.10.2026, saw `нет` at every road 37 s
+    // after his VPN came up, and the line stayed so. A change of the network asks for a probe once it settles: a VPN
+    // raises and drops its adapter several times while it connects.
+    readonly DispatcherTimer _probeAgain = new() { Interval = TimeSpan.FromSeconds(20) };
+    readonly DispatcherTimer _networkSettled = new() { Interval = TimeSpan.FromSeconds(8) };
+    int _silentProbes;
+
+    const string ProbeTip = "Проба: стук в TCP-порт 22 машин и обоих VPS. Время - до ближайшего узла маршрута; молчащий маршрут АВТО обходит. Запустить заново: TUNNEL → NET → PORT 22 TCP PING или СОСТОЯНИЕ.";
+
+    void WatchNetwork()
+    {
+        ToolTip.SetTip(ProbeBadge, Lang.T(ProbeTip));
+        _probeAgain.Tick += (_, _) => { _probeAgain.Stop(); StartProbe(quiet: true); };
+        _networkSettled.Tick += (_, _) => { _networkSettled.Stop(); _silentProbes = 0; StartProbe(quiet: true); };
+        NetworkChange.NetworkAddressChanged += OnNetworkChanged;
+        Closed += (_, _) => { NetworkChange.NetworkAddressChanged -= OnNetworkChanged; _probeAgain.Stop(); _networkSettled.Stop(); };
+    }
+
+    // Raised on a thread of the system: the timer is restarted on the window's own.
+    void OnNetworkChanged(object? sender, EventArgs e) => Dispatcher.UIThread.Post(() => { _networkSettled.Stop(); _networkSettled.Start(); });
 
     void WireRoutes()
     {
@@ -288,6 +312,9 @@ public partial class MainWindow
         Sources.RouteFail.Clear();
         _probeStamp = DateTime.Now.ToString("HH:mm");
         _probing = false;
+        // Nobody answered at all - not even MAIN VPS or the door of cloudflared: the network is not up yet, as a rule.
+        if (results.Count > 0 && results.All(r => !r.Ok)) { if (++_silentProbes <= 3) _probeAgain.Start(); }
+        else _silentProbes = 0;
         if (_barButtons.TryGetValue("ProbeButton", out var again)) again.IsEnabled = true;
         // The probe decides the road and ends later than the first reading of the panels: they
         // are read again, or they go on knocking at an address that is silent in this network.
@@ -405,19 +432,28 @@ public partial class MainWindow
     {
         var inlines = ProbeText.Inlines ??= new InlineCollection();
         inlines.Clear();
-        if (_probeStamp.Length == 0) return;
+        if (_probeStamp.Length == 0) { ToolTip.SetTip(ProbeBadge, Lang.T(ProbeTip)); return; }
         var muted = App.Ink("TextMuted");
+        var whole = new System.Text.StringBuilder(Lang.F("проба {0}", _probeStamp));
         inlines.Add(new Run(Lang.F("проба {0}", _probeStamp)) { Foreground = muted });
         foreach (var (key, text) in new[] { ("base", "BASE"), ("direct", "MAIN VPS"), ("cloud", "MAIN VPS CF"), ("second", "SECOND VPS") })
         {
             if (!Sources.LanUp.ContainsKey(key)) continue;
+            var delay = Delay(_lanMs.GetValueOrDefault(key));
             inlines.Add(new Run($" · {text} ") { Foreground = muted });
-            inlines.Add(new Run(Delay(_lanMs.GetValueOrDefault(key))) { Foreground = App.Ink(Sources.LanUp[key] ? "DotOk" : "DotWarn") });
+            inlines.Add(new Run(delay) { Foreground = App.Ink(Sources.LanUp[key] ? "DotOk" : "DotWarn") });
+            whole.Append($" · {text} {delay}");
         }
         var route = Sources.RouteName("base");
+        var road = route.Length > 0 ? route : "LAN";
         var common = CommonRoute();
         var how = common is null ? Lang.T("по машинам") : common.Length > 0 ? Lang.T("выбрано") : Lang.T("по пробе");
-        inlines.Add(new Run(Lang.F(" · путь: {0} ({1})", route.Length > 0 ? route : "LAN", how)) { Foreground = muted });
+        // The line stands between the data folder and the buttons of the top row and must fit there (the owner,
+        // 20.10.2026: «она не влезает»): the road after an arrow, and who chose it only when it was not the probe.
+        // The whole line, with the way of the choice, is the tooltip - above what the probe is.
+        inlines.Add(new Run(common is { Length: 0 } ? $" → {road}" : $" → {road} ({how})") { Foreground = muted });
+        whole.Append(Lang.F(" · путь: {0} ({1})", road, how));
+        ToolTip.SetTip(ProbeBadge, whole + "\n\n" + Lang.T(ProbeTip));
     }
 
     void SetDot(string name, string state, string hint = "")

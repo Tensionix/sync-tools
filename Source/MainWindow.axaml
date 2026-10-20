@@ -26,8 +26,8 @@
                 <Button x:Name="DataBadge" Classes="small" Margin="0" ToolTip.Tip="Папка данных этой машины: ключи, адреса, конфиги и зеркала лежат в ней, а не в программе. Нажатие открывает её в проводнике; выбрать другую - SETTINGS → ПАПКА ДАННЫХ."/>
             </StackPanel>
             <!-- What the probe saw last, one dark badge in the middle: every road with its time and the road taken. -->
-            <Border Grid.Column="1" x:Name="ProbeBadge" Classes="probe" HorizontalAlignment="Center" Margin="14,0,14,3"
-                    ToolTip.Tip="Проба: стук в TCP-порт 22 машин и обоих VPS. Время - до ближайшего узла маршрута; молчащий маршрут АВТО обходит. Запустить заново: TUNNEL → NET → PORT 22 TCP PING или СОСТОЯНИЕ.">
+            <!-- Its tooltip is set by the code: the whole line of the last probe above what the probe is (MainWindow.Probe). -->
+            <Border Grid.Column="1" x:Name="ProbeBadge" Classes="probe" HorizontalAlignment="Center" Margin="14,0,14,3">
                 <TextBlock x:Name="ProbeText" Classes="caption" TextTrimming="CharacterEllipsis"/>
             </Border>
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

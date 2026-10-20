@@ -151,6 +151,7 @@ public partial class MainWindow : Window
         foreach (var problem in SafeFile.Pending) SetStatus(problem);
         SafeFile.Pending.Clear();
         _active.FocusList();
+        WatchNetwork();
         StartProbe(quiet: true);
         FindLegacyTask();
         OpenClouds();

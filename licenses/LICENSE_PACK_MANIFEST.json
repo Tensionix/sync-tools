@@ -1,7 +1,7 @@
 {
   "schema": "audion.build_licenses.pack_manifest.v1",
-  "generated_utc": "2026-10-18T12:25:53Z",
-  "run_id": "20261018T122552Z_audion-sync-tools_8eb9ef25",
+  "generated_utc": "2026-10-20T09:56:42Z",
+  "run_id": "20261020T095641Z_audion-sync-tools_cf3c4aef",
   "project_id": "audion-sync-tools",
   "project_name": "Audion Sync Tools",
   "scan_root": ".",
@@ -19,7 +19,7 @@
     },
     {
       "name": "COMPONENTS.json",
-      "sha256": "d0e48e800b5f2a4cfcf39fe5d0818f7cd09d7d33fd70f545e61e02c523e8bf8d",
+      "sha256": "f4c313f9b291b4bd6a2e9e1c8fc5212a5ccb34e2e2c5561c5adff53f494e90be",
       "size": 154863
     },
     {
@@ -29,8 +29,8 @@
     },
     {
       "name": "LICENSE_SCAN_REPORT.md",
-      "sha256": "a4e655207e301763a8d78ec196a69304b996358e7d2ae1788ff46a68698b7dfa",
-      "size": 7317
+      "sha256": "90b96ae0f55e4441e09204bd52872b37e2e1f9052a0e350a18ec8c4e5bbdd8b5",
+      "size": 7286
     }
   ]
 }

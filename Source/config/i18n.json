@@ -4234,5 +4234,8 @@
  },
  "маршруты сброшены: всем машинам АВТО, умолчаний нет": {
   "en": "the routes are reset: AUTO for every machine, no defaults"
+ },
+ "считаю…": {
+  "en": "counting…"
  }
 }

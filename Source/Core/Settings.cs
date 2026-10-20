@@ -48,12 +48,13 @@ public sealed class Settings
     /// <summary>The font of the program and the font of the panels and the journal; both ship inside by default.</summary>
     public string UiFont { get; set; } = "JetBrains Mono";
     public string PanelFont { get; set; } = "JetBrains Mono";
-    /// <summary>The backdrop of Windows 11: "" - a solid window, "acrylic", "mica".</summary>
-    public string Backdrop { get; set; } = "";
+    /// <summary>The backdrop of Windows 11: "" - a solid window, "acrylic", "mica". A fresh copy opens with ACRYLIC in the
+    /// file panels (the owner, 20.10.2026: «акрил в панелях - по умолчанию»); a choice once saved stays.</summary>
+    public string Backdrop { get; set; } = "acrylic";
     /// <summary>How much of the backdrop shows through: "light", "mid", "dense".</summary>
     public string BackdropDensity { get; set; } = "mid";
     /// <summary>With a backdrop on: only the file lists show it, the rest of the window stays solid.</summary>
-    public bool BackdropPanelsOnly { get; set; }
+    public bool BackdropPanelsOnly { get; set; } = true;
     public double Width { get; set; }
     public double Height { get; set; }
     public double LogWidth { get; set; } = 0.28;

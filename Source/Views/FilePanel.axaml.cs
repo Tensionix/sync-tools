@@ -47,6 +47,10 @@ public partial class FilePanel : UserControl
     bool _desc;
     string _space = "";
     string _problem = "";
+    // Space counts the folders it marks, two at a time: a far machine answers "rclone size" in seconds, and a run of
+    // Spaces must not start a process for every folder at once. Rows read anew drop the counts of the rows they replace.
+    readonly SemaphoreSlim _counters = new(2, 2);
+    CancellationTokenSource _counts = new();
 
     static readonly SortKey?[] ColumnKeys = { null, SortKey.Name, SortKey.Size, SortKey.Date };
     static readonly string[] ColumnTitles = { "", "ИМЯ", "РАЗМЕР", "ДАТА" };
@@ -214,6 +218,7 @@ public partial class FilePanel : UserControl
 
     void Show(List<FileRow> rows, string? select)
     {
+        StopCounts();
         _listed = rows;
         _space = "";
         Display(select);
@@ -272,6 +277,7 @@ public partial class FilePanel : UserControl
     public void ShowFound(string key, string path, string title, IReadOnlyList<Found> files)
     {
         _reading?.Cancel();
+        StopCounts();
         if (QuickBox.IsVisible) { QuickBox.IsVisible = false; QuickBox.Text = ""; _quick = ""; }
         SourceKey = key;
         Path = path;
@@ -390,9 +396,11 @@ public partial class FilePanel : UserControl
         if (ShowingFound) parts.Insert(0, _foundTitle);
         if (marked.Count > 0)
         {
-            long bytes = marked.Where(r => !r.IsDir).Sum(r => Math.Max(0, r.Size));
+            // The files and the folders Space counted; a folder not counted weighs nothing here.
+            long bytes = marked.Sum(r => Math.Max(0, r.Bytes));
             parts.Add(Lang.F("ОТМЕЧЕНО: {0} · {1}", marked.Count, Format.ExactBytes ? Lang.F("{0} байт", Format.Exact(bytes)) : Format.Size(bytes)));
         }
+        if (_rows.Any(r => r.Counting)) parts.Add(Lang.T("считаю…"));
         if (_space.Length > 0) parts.Add(_space);
         Status.Text = string.Join("   ", parts);
     }
@@ -508,14 +516,51 @@ public partial class FilePanel : UserControl
         UpdateStatus();
     }
 
-    void MarkAndStep()
+    /// <summary>Space and Insert: the mark goes on or off and the cursor down. Space on a folder it marks counts the folder too.</summary>
+    void MarkAndStep(bool count)
     {
         if (List.SelectedItem is not FileRow row) return;
         row.Checked = !row.Checked;
+        if (count && row.Checked) CountFolder(row);
         var next = Math.Min(List.SelectedIndex + 1, _rows.Count - 1);
         List.SelectedIndex = next;
         List.ScrollIntoView(_rows[next], null);
         UpdateStatus();
+    }
+
+    /// <summary>
+    /// Space on a folder, as in Total Commander (the owner, 20.10.2026: «размер объекта (папки) по выделению пробелом»):
+    /// the size is counted - the disk itself for this machine, "rclone size" for a far one - and stands in the column
+    /// РАЗМЕР and in ОТМЕЧЕНО. A folder counted already is not counted again; a drive of the list of drives is not counted
+    /// at all - that is the whole disk.
+    /// </summary>
+    async void CountFolder(FileRow row)
+    {
+        if (!row.IsDir || row.Counting || row.Counted >= 0) return;
+        if (!Sources.Get(SourceKey).IsRemote && Path.Length == 0) return;
+        string key = SourceKey, path = Sources.Child(Path, row.Name);
+        var cancel = _counts.Token;
+        row.Counting = true;
+        long? bytes = null;
+        try
+        {
+            await _counters.WaitAsync(cancel);
+            try { bytes = await Listing.FolderSize(key, path, cancel); }
+            finally { _counters.Release(); }
+        }
+        catch { }
+        row.Counting = false;
+        // The panel read its rows anew meanwhile: this row is not on the screen any more.
+        if (cancel.IsCancellationRequested) return;
+        row.Counted = bytes ?? FileRow.NoAnswer;
+        UpdateStatus();
+    }
+
+    /// <summary>The counts of Space are about the rows on the screen: new rows stop them.</summary>
+    void StopCounts()
+    {
+        _counts.Cancel();
+        _counts = new CancellationTokenSource();
     }
 
     /// <summary>
@@ -552,7 +597,9 @@ public partial class FilePanel : UserControl
             case Key.Enter: EnterCurrent(); e.Handled = true; break;
             case Key.Back: Up(); e.Handled = true; break;
             case Key.Space when e.KeyModifiers.HasFlag(KeyModifiers.Shift): ShowBytes(); e.Handled = true; break;
-            case Key.Space or Key.Insert: MarkAndStep(); e.Handled = true; break;
+            // Space also counts a folder it marks; Insert only marks, as in Total Commander.
+            case Key.Space: MarkAndStep(count: true); e.Handled = true; break;
+            case Key.Insert: MarkAndStep(count: false); e.Handled = true; break;
             case Key.R when ctrl: ReloadNow(); e.Handled = true; break;
             // Ctrl+A marks everything; pressed again with everything marked, it takes the marks off.
             case Key.A when ctrl: SetMarks(_rows.Count == 0 || !_rows.All(r => r.Checked)); e.Handled = true; break;
