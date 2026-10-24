@@ -365,6 +365,7 @@ public partial class MainWindow
     async void Sync(string mode)
     {
         using var pending = Pending();
+        if (mode == "bisync" && !NeedData()) return;
         FilePanel from = _active, to = Other;
         if (AtDisks(from) || AtDisks(to)) { Journal.Add(Lang.T("[окно] обе панели должны стоять в папке, а не на списке дисков")); return; }
         string src = Sources.RemotePath(from.SourceKey, from.Path), dst = Sources.RemotePath(to.SourceKey, to.Path);

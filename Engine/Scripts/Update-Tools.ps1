@@ -66,7 +66,7 @@ $ToolsDir = Join-Path $AppRoot 'Tools'
 $Work = Join-Path $AppRoot '._runtime\tools-update'
 # Сюда уезжает файл, который держит работающий процесс: заменить его нельзя,
 # убрать в сторону - можно. Чистится при следующем запуске, когда освободится.
-$Aside = Join-Path $AppRoot '._runtime\tools-aside'
+$Aside = Join-Path $AppRoot 'Recovery\tools-aside'
 
 # Без ключей обновляем всё: человек сказал «обнови инструменты».
 if (-not $Cloudflared -and -not $Rclone -and -not $Terminal -and -not $PeaZip -and -not $Edit -and -not $Micro) {

@@ -1,6 +1,6 @@
-﻿---
+---
 name: audion-build-backup
-description: Keep a local copy of MAIN VPS and everything the copy needs - the nightly snapshot from r2:audion-backup unpacked into six mirrors, the SSH and R2 keys laid into the places programs read them from, the Cloudflare tunnel client, remote access to the home machines over four selectable routes, and a snapshot of the private Build-stack archives into the R2 bucket. Backups only - it never publishes, never builds, and never touches a release. Use when restoring or refreshing the local MAIN VPS mirror, moving keys to another machine, fixing "Identity file not accessible" or an ssh key rejected for permissions, reaching the home machines from a foreign network, issuing a WireGuard config from the router, or backing up the builders' private archives.
+description: Keep a verified local MAIN VPS recovery set and an auto-discovered Forgejo library in MIR mode, replacing managed copies while protecting connection settings, keys and recovery snapshots; manage tunnel access and private Build-stack backups. Backups only - it never publishes, never builds, and never touches a release.
 ---
 
 # Audion Sync Tools
@@ -12,7 +12,7 @@ the rules of engagement are in `CLAUDE.md`; the human account is in
 Two folders, always: **the program** (this one — window, scripts, its own
 `rclone`, templates, the tunnel client) and **the data** (the
 neighbouring `Audion Backup <Machine>` — connection configs, R2 and cloud credentials,
-snapshots, six mirrors, keys and tokens; the owner-managed OpenVPN Portable is
+snapshots, the repository library, keys and tokens; the owner-managed OpenVPN Portable is
 an explicit exception and lives in data with its profiles and RDP file).
 The data path is derived from where the program stands; every
 wrapper and the window accept `-Root`. Never hard-code a drive letter: the same
@@ -25,9 +25,10 @@ happens in the window that cannot happen from a console.
 
 ### Backups and keys — `Runs`
 
-    sync-backup.cmd                 MAIN VPS mirror: snapshot from R2 plus code over ssh
+    sync-backup.cmd                 verified recovery from R2 plus all Forgejo repositories
     sync-backup.cmd -WhatIf         show the plan, write nothing
-    sync-backup.cmd -Only "A,B"     refresh only these folders; snapshot rotation still applies
+    sync-backup.cmd -Only "A,B"     install only these folders; still verify the full input set
+    sync-backup.cmd -Snapshot <tar> reuse a local recovery archive + adjacent .sha256; verify live Git
     import-keys.cmd                 lay keys into profile, config\rclone, git configs
     import-keys.cmd -Check          say what would change, change nothing
     import-keys.cmd -Source Store   take the Tunnel folder (golden copy), not Export Keys
@@ -488,7 +489,7 @@ that fills them, and where each thing lands.
     PORT 22 TCP PING  TUNNEL → NET               which routes are alive right now; colours the indicators
     DIAGNOSTICS       TUNNEL → NET               the full picture, report into logs\routes-*.log
     DRY RUN           STORAGE → MAIN VPS MIRROR  what would be updated; touches nothing
-    SYNC ALL          STORAGE → MAIN VPS MIRROR  the night snapshot and the six mirror folders
+    SYNC ALL          STORAGE → MAIN VPS MIRROR  full recovery + auto-discovered repository library
     RELEASE           STORAGE → UPLOAD TO R2     the folder with the private archives
     DRY RUN           STORAGE → UPLOAD TO R2     what would go into the R2 bucket
     PRIVATE BACKUP    STORAGE → UPLOAD TO R2     uploads the private Build-stack archives
@@ -499,21 +500,44 @@ A daily task left by earlier versions is deleted by REMOVE TASK in SETUP, shown 
 
 Where it lands in the data folder:
 
-    Snapshots\                 the night snapshot as it came, plus its checksum
-    <six mirror folders>       unpacked from the snapshot or pulled over ssh
+    Snapshots\                 canonical recovery tar, checksum, complete readable recovery view
+    Forgejo Mirror\            every repository, all refs/HEAD verified, Git fsck
+    <known project folders>    MIR of Git source + selected published data; explicit protectedLocal only
+    Repositories\<owner>\      new/unmapped repositories, automatic working copies
+    Recovery\sync-all\sync-all-<id>\ durable staging/rollback until success, then JSON proofs only
     Tunnel\SSH, Tunnel\Export  keys - filled during setting up, not here
 
-What the mirror takes and where it puts it is described in `config\mirror.json`,
-not in the script: on someone else's MAIN VPS the folders are different, and that
-is not solved by editing code. A source is `snapshot` (a part of the night
-archive) or `server` (pulled straight over ssh); `subdir` picks one branch out
-of an unpacked part, `pick` collects only the named branches flat, `skip` drops
-files by extension, `mirror` levels the folder with its source, deleting what
-the source does not have. The script refuses to start when the file is missing,
-empty, or a source has neither a part nor a path.
+Plan v2 lives in DATA `config\mirror.json`; the program ships only a template
+without a value of any household (`config\mirror.sample.json`, every value a <...>).
+`forgejo` defines owners, repository root, URL and DATA identity/trust paths;
+`sources` maps Git projects and payload views; `coverage` defines the archive
+layouts for operational verification. Read [SYNC ALL](Docs/SYNC_ALL_EN.md)
+before changing this flow. No plan, a v1 plan or a <...> left in it stops SYNC ALL
+before any write: the engine never builds or finishes a plan from the program. A new
+machine copies the plan from the DATA of a machine where SYNC ALL has run.
+Always MIR: server versions replace local edits/extras inside managed library
+folders. protectedLocal explicitly preserves secrets; Tunnel, connection config
+and full recovery Snapshots are outside deletion. before is temporary rollback,
+removed after successful verification along with old SYNC ALL caches. A write-ahead
+journal and OS lock protect replacements; changes during staging stop the run.
+No restore, collector, publication or model call belongs in this action.
+
+Scratch is disposable in both program and DATA after the GUI and CLI workers stop.
+Only DATA/config holds cloud session.conf (with its source checksum) and BISYNC pairs/listings;
+BISYNC without DATA is refused, not saved in a public program config. DATA/Recovery holds
+restore backups, conflicts and legacy runtime copies; Recovery/sync-all holds the durable
+journal/rollback. Program Recovery is binary rollback only (App/Tools). StorageLayout.ps1
+does verified offline migration; Initialize-DataFolder invokes it on preparation. The manual
+door is Engine/Scripts/Migrate-RuntimeStorage.ps1 -Root <DATA> [-IncludeProgram].
+Do not migrate program state into an unrelated one-run -Root or another machine's DATA.
+Tests/Test-RuntimeStorage.ps1 and the headless stand delete scratch and check reopening;
+the Python suite checks interrupted SYNC ALL recovery with no scratch left.
+No separate conflict override: MIR is permanent. Self-contained local mirrors with exactly current
+refs/HEAD and a successful fsck can supply cached objects; origin remains the server.
 
 Two things are worth doing in the safe mode first: both `DRY RUN` buttons in STORAGE.
-Both read for real - buckets, snapshot, MAIN VPS - and write nothing.
+SYNC ALL's DRY RUN reads the real Git catalog over SSH and writes nothing in DATA;
+PRIVATE BACKUP's DRY RUN reads its archive inputs and bucket listing.
 
 The mirror does not need to live on every machine. A laptop that only reaches
 files needs steps 1-6 of setting up and nothing from this list.
@@ -540,7 +564,7 @@ in it, the scripts of `Engine\Scripts` and the tests import it.
 test; what each one printed stays in `._runtime\tests\<shell>`. `-Only Cli,Targets`
 runs the named ones, `-Shell pwsh.exe` the same under another PowerShell, to compare.
 `Cli`, `Test-Cli` and `Test-Cli.ps1` name the same test. A name that fits nothing ends with 1:
-it used to end with «all passed» over zero tests. The last line says how many passed - 30 now.
+it used to end with «all passed» over zero tests. The last line says how many passed - 32 now.
 
     App\AudionPs.exe -NoProfile -ExecutionPolicy Bypass -File Tests\Run-Tests.ps1
 
@@ -599,7 +623,7 @@ folder is chosen and before the ADDRESSES wizard on a folder without addresses. 
 `targets.json` from `Tunnel\RemoteDesktop\config\targets.sample.json` where there is none (a file
 that is there is never replaced), brings in the entry of SECOND VPS from `~\.ssh\config`, and moves
 the working files a version before 1.15.0 left in the program folder; with `-Previous` what belongs
-to another machine goes to `._runtime\migrated-*` of the data instead. One line of JSON:
+to another machine goes to `Recovery\migrated-*` of the data instead. One line of JSON:
 `moved`, `quarantined`, `quarantine`, `targets`, `second`. `-SshConfig <file>` names another ssh
 config - `Tests\Test-DataFolder.ps1` runs the script whole on a throwaway data folder with an empty one.
 
@@ -822,7 +846,7 @@ Connection files below are relative to the selected machine data folder:
 Templates, themes, version and GUI preferences remain in the program. What a
 person made in the window lies in data as well and outlives a cleanup of the
 program: the sets of masks and the pairs of BISYNC.
-Legacy conflicts are preserved under `._runtime\migrated-<time>-<id>` in data,
+Legacy conflicts are preserved under `Recovery\migrated-<time>-<id>` in data,
 never over an existing working file. IMPORT KEYS restores flat SSH exports and
 the `clients`/`servers` subfolders, including both client public-key names. Auto
 prefers Export Keys but supplements missing server pairs from golden

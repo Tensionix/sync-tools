@@ -78,13 +78,13 @@ public partial class MainWindow
             // ---------------------------------------------------- STORAGE
             case "SyncAllButton":
             {
-                // The mirror levels the local copy by MAIN VPS: what is extra here goes here. For six mirrors at once that is worth a question.
-                var go = await Dialog.Ask(this, "Обновить все зеркала?", new[]
+                // MIR validates incoming copies and uses temporary rollback until verification.
+                var go = await Dialog.Ask(this, "Обновить библиотеку?", new[]
                 {
                     "ОТКУДА: MAIN VPS",
                     Lang.F("КУДА  : {0}", DataRoot.Path_),
                     "",
-                    "Местная копия равняется по MAIN VPS: чего на MAIN VPS нет, того не станет и здесь.",
+                    "Режим MIR: локальные правки и лишние файлы в зеркалах удаляются. Ключи, подключения и recovery-снимки защищены.",
                     "Посмотреть, что изменится, не трогая файлы, — кнопка DRY RUN.",
                 }, "SYNC ALL", Tone.Warn);
                 if (go is null) { Journal.Add(Lang.T("[окно] отменено")); return; }
@@ -176,7 +176,7 @@ public partial class MainWindow
             {
                 var choice = await ChoiceDialog.Ask(this, "RESTORE", new[]
                 {
-                    new Choice("mirror", "Начисто из DATA (MIRROR)", "После переустановки: C: ровно как в DATA, лишнее - в DATA\\._runtime. Ждёт UAC, вход в Access и пароли роутеров"),
+                    new Choice("mirror", "Начисто из DATA (MIRROR)", "После переустановки: C: ровно как в DATA, лишнее - в DATA\\Recovery. Ждёт UAC, вход в Access и пароли роутеров"),
                     new Choice("restore", "Восстановить эту машину", "Существующий SSH config сохранить"),
                     new Choice("routes", "Восстановить и заменить SSH config", "Маршруты из DATA; прежний config сохранить одной копией"),
                 });
@@ -389,6 +389,7 @@ public partial class MainWindow
         var root = DataRoot.Path_;
         var args = new List<string> { "-Root", root };
         if (previous.Length > 0) { args.Add("-Previous"); args.Add(previous); }
+        if ((previous.Length == 0 || !Directory.Exists(previous)) && DataRoot.Named.Length == 0) args.Add("-MigrateProgram");
         var answer = await Task.Run(() => Scripts.Capture(SetupScript("Initialize-DataFolder.ps1"), args));
         // The folder changed while the script ran: its answer is about another folder.
         if (!string.Equals(root, DataRoot.Path_, StringComparison.OrdinalIgnoreCase)) return false;
@@ -414,7 +415,7 @@ public partial class MainWindow
         {
             Journal.Add(Lang.F("перенесено в папку данных: файлов {0}", moved.Count + quarantined.Count));
             foreach (var (what, rel) in moved.Concat(quarantined)) Journal.Add("  " + Lang.T(what) + ": " + rel);
-            if (quarantined.Count > 0) Journal.Add(Lang.T("копии из программы, отличные от данных, убраны в карантин ._runtime\\migrated"));
+            if (quarantined.Count > 0) Journal.Add(Lang.T("копии из программы, отличные от данных, убраны в карантин Recovery\\migrated"));
             changed = true;
         }
         if (Flag(said, "targets"))

@@ -1,6 +1,6 @@
 @echo off
 rem Changes nothing: shows the cloudflared version, whether the keys are in place,
-rem whether ssh.audion.dev resolves, whether the ssh routes are written, and
+rem whether the cloudflared name of MAIN VPS resolves, whether the ssh routes are written, and
 rem prints the Proxy command line for a Tabby profile.
 rem Comments are ASCII on purpose - cmd reads .cmd files in the OEM codepage.
 

@@ -125,7 +125,10 @@ rem together in ._runtime\app_stage and checked there; App\ is replaced only by
 rem a copy that starts, so a failed build leaves the working one in place.
 set "STEP_ERROR=0"
 set "STAGE=%BASE_DIR%\._runtime\app_stage"
-set "OLD=%BASE_DIR%\._runtime\app_old"
+set "OLD=%BASE_DIR%\Recovery\app-old"
+if not exist "%BASE_DIR%\Recovery" md "%BASE_DIR%\Recovery"
+rem An interrupted earlier install can always recover without the disposable scratch.
+if not exist "%BASE_DIR%\App" if exist "!OLD!" move "!OLD!" "%BASE_DIR%\App" >nul 2>nul
 set "DOTNET=%ProgramFiles%\dotnet\dotnet.exe"
 if not exist "!DOTNET!" set "DOTNET="
 if not defined DOTNET for %%P in (dotnet.exe) do if not defined DOTNET set "DOTNET=%%~$PATH:P"
@@ -185,7 +188,7 @@ if "!STEP_ERROR!"=="0" (
       if exist "%BASE_DIR%\App\AudionSyncTools.exe" (
         echo [ERROR] The new App\ could not be moved into place; the former one was put back. The new copy waits in ._runtime\app_stage - run the step again.
       ) else (
-        echo [ERROR] The new App\ could not be moved into place and there is no App\ now. The new copy waits in ._runtime\app_stage, a former one - in ._runtime\app_old: move one of them to App\ by hand before the cleanup of the project removes ._runtime.
+        echo [ERROR] The new App\ could not be moved into place and there is no App\ now. The previous copy is retained in Recovery\app-old; it is outside disposable scratch.
       )
       set "STEP_ERROR=1"
     )

@@ -6,8 +6,9 @@
     What the ADDRESSES button of SETUP does once its table is filled in. The answers come as a
     JSON file (the window writes it, this script reads it and removes it):
 
-        { "rows":   { "base": { "label": "BASE", "address": "192.168.10.50", "user": "igor", "port": "22" }, ... },
-          "second": { "sshHost": "second-vps", "sshHostCf": "second-vps-cf", "key": "second_vps_ed25519" } }
+        { "rows":   { "base": { "label": "BASE", "address": "192.168.10.50", "user": "user", "port": "22" }, ... },
+          "second": { "sshHost": "second-vps", "sshHostCf": "second-vps-cf", "key": "second_vps_ed25519" },
+          "server": { "cloudflaredHost": "<the name cloudflared goes to MAIN VPS by>" } }
 
     A row without an address is left alone: nobody goes to that machine. Every address written is
     knocked at once - a silent port is told, it is not an error of the writing. The names of
@@ -107,7 +108,19 @@ if ($answer.second) {
     if ($namesWritten) { Write-Host 'SECOND VPS: the names are written into targets.json' }
 }
 
-if ($written -or $namesWritten) {
+# The name cloudflared goes to MAIN VPS by: an address of the household, so the program holds none.
+$cloudWritten = $false
+if ($answer.server -and [string]$answer.server.cloudflaredHost) {
+    $cloudName = ([string]$answer.server.cloudflaredHost).Trim()
+    if ($cloudName -notmatch '^[A-Za-z0-9.-]+$') {
+        Write-Host ('MAIN VPS: a name with spaces and signs is not written: {0}' -f $cloudName)
+    } elseif (Set-AbkMainVpsCloudflared -Path $file -Value $cloudName) {
+        Write-Host 'MAIN VPS: the name for cloudflared is written into targets.json'
+        $cloudWritten = $true
+    }
+}
+
+if ($written -or $namesWritten -or $cloudWritten) {
     Write-Host 'next: SSH-KEYSCAN - collect the host keys, then RCLONE.CONF - build the config'
 }
 

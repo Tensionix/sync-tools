@@ -62,8 +62,9 @@ public static class DataStore
 
     public static string MaskSetsFile => Path.Combine(ConfigDir, "mask-sets.json");
 
-    /// <summary>Without a data folder a pair still has to keep its state somewhere: the scratch of the program, till a cleanup.</summary>
-    static string BisyncDir => DataRoot.Chosen ? Path.Combine(ConfigDir, "bisync") : Path.Combine(Paths.State, "bisync");
+    /// <summary>BISYNC needs DATA; never save private paths or listings in the public program.</summary>
+    static string BisyncDir => DataRoot.Chosen ? Path.Combine(ConfigDir, "bisync")
+        : throw new InvalidOperationException("Select a Data Folder before BISYNC.");
 
     public static string BisyncPairsFile => Path.Combine(BisyncDir, "pairs.json");
 

@@ -454,3 +454,86 @@ function Set-AbkSecondVpsNames {
     [System.IO.File]::WriteAllText($Path, $text, [System.Text.UTF8Encoding]::new($true))
     return $true
 }
+
+function Get-AbkMainVps {
+    <#
+        MAIN VPS этой машины: имя для прямого пути (host записи `server`) и имя,
+        по которому до него ходит cloudflared (cloudflaredHost). Оба - адреса
+        хозяйства: первое ведёт прямо на внешний адрес сервера. Живут они в
+        targets.json папки данных, в программе их нет.
+
+        Нет их в записи - берутся из ~\.ssh\config этой же машины: HostName
+        хостов audion-vps-direct и audion-vps, которые прописал клиент туннеля.
+        Так выглядит машина, настроенная до этих полей. Source говорит, откуда
+        ответ: targets, ssh-config или none.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$AppRoot,
+        # Для проверок: свой ssh config вместо пользовательского.
+        [string]$SshConfig = '',
+        [string]$DataRoot = ''
+    )
+
+    $vps = @{ Host = ''; CloudflaredHost = ''; Source = 'none' }
+    $file = Get-AbkWorkPath -AppRoot $AppRoot -Rel 'Tunnel\RemoteDesktop\config\targets.json' -DataRoot $DataRoot
+    if ($file -and (Test-Path -LiteralPath $file)) {
+        $entry = $null
+        try { $entry = (Get-Content -LiteralPath $file -Raw -Encoding UTF8 | ConvertFrom-Json).server } catch { $entry = $null }
+        if ($entry) {
+            if ([string]$entry.host) { $vps.Host = [string]$entry.host }
+            if ([string]$entry.cloudflaredHost) { $vps.CloudflaredHost = [string]$entry.cloudflaredHost }
+            if ($vps.Host -or $vps.CloudflaredHost) { $vps.Source = 'targets' }
+        }
+    }
+    if (-not $vps.Host -or -not $vps.CloudflaredHost) {
+        $hosts = @(Read-AbkSshConfig -Path $SshConfig)
+        foreach ($pair in @(@('Host', 'audion-vps-direct'), @('CloudflaredHost', 'audion-vps'))) {
+            if ($vps[$pair[0]]) { continue }
+            $known = @($hosts | Where-Object { $_.Names -contains $pair[1] -and [string]$_.HostName -and [string]$_.HostName -ne $pair[1] })
+            if ($known.Count) {
+                $vps[$pair[0]] = [string]$known[0].HostName
+                if ($vps.Source -eq 'none') { $vps.Source = 'ssh-config' }
+            }
+        }
+    }
+    return $vps
+}
+
+function Set-AbkMainVpsCloudflared {
+    <#
+        Имя MAIN VPS для cloudflared - поле cloudflaredHost записи `server`.
+        Поле есть - значение меняется на месте; его нет (файл старше поля) - оно
+        встаёт следом за sshHost. Пустое значение не пишется. Возвращает,
+        изменилось ли что-нибудь.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [string]$Value = ''
+    )
+
+    if (-not $Value -or -not (Test-Path -LiteralPath $Path)) { return $false }
+    $text = [System.IO.File]::ReadAllText($Path)
+    $at = $text.IndexOf('"server":')
+    $stop = $(if ($at -ge 0) { $text.IndexOf("`n  }", $at) } else { -1 })
+    if ($stop -lt 0) { return $false }
+
+    $part = $text.Substring($at, $stop - $at)
+    $safe = $Value.Replace('\', '\\').Replace('"', '\"')
+    if ($part -match '"cloudflaredHost"\s*:') {
+        $fresh = Set-AbkJsonFields -Text $part -Values ([ordered]@{ cloudflaredHost = $Value })
+    } else {
+        $line = [regex]::Match($part, '(\r?\n)([ \t]*)"sshHost"\s*:\s*"[^"]*"(,?)')
+        if (-not $line.Success) { return $false }
+        $newline, $indent, $comma = $line.Groups[1].Value, $line.Groups[2].Value, $line.Groups[3].Value
+        $field = '{0}{1}"cloudflaredHost": "{2}"' -f $newline, $indent, $safe
+        # sshHost was the last field: it gets the comma, the new one stands last.
+        $insert = $(if ($comma) { $line.Value + $field + ',' } else { $line.Value + ',' + $field })
+        $fresh = $part.Substring(0, $line.Index) + $insert + $part.Substring($line.Index + $line.Length)
+    }
+    if ($fresh -eq $part) { return $false }
+
+    $text = $text.Substring(0, $at) + $fresh + $text.Substring($stop)
+    try { $null = $text | ConvertFrom-Json } catch { return $false }
+    [System.IO.File]::WriteAllText($Path, $text, [System.Text.UTF8Encoding]::new($true))
+    return $true
+}

@@ -327,6 +327,39 @@ try {
              $namesBack.second.key -eq 'my_second_ed25519')
     $namesAgain = Set-AbkSecondVpsNames -Path $portTargets -SshHost 'my-second'
     Test-Step -Title 'те же имена второй раз ничего не меняют' -Ok (-not $namesAgain)
+
+    # Имена MAIN VPS - адреса хозяйства: из targets.json, иначе из маршрутов ~\.ssh\config этой машины; в коде их нет.
+    $mainApp = Join-Path $sshLab 'main-app'
+    $mainConf = Join-Path $mainApp 'Tunnel\RemoteDesktop\config'
+    New-Item -ItemType Directory -Path $mainConf -Force | Out-Null
+    Copy-Item -LiteralPath $sample -Destination (Join-Path $mainConf 'targets.sample.json')
+    $mainTargets = Join-Path $mainConf 'targets.json'
+    # Файл старше поля cloudflaredHost: поля в нём нет вовсе.
+    $older = [System.IO.File]::ReadAllText($sample) -replace '\r?\n\s*"cloudflaredHost": "",', ''
+    [System.IO.File]::WriteAllText($mainTargets, $older, [System.Text.UTF8Encoding]::new($true))
+    $mainConfig = Join-Path $sshLab 'main-config'
+    [System.IO.File]::WriteAllLines($mainConfig, [string[]]@('Host audion-vps', '    HostName door.example.invalid',
+        'Host audion-vps-direct', '    HostName direct.example.invalid'))
+    $fromSsh = Get-AbkMainVps -AppRoot $mainApp -DataRoot $mainApp -SshConfig $mainConfig
+    Test-Step -Title 'имена MAIN VPS без записи берутся из ssh config' `
+        -Ok ($fromSsh.Source -eq 'ssh-config' -and $fromSsh.CloudflaredHost -eq 'door.example.invalid' -and $fromSsh.Host -eq 'direct.example.invalid')
+    $none = Get-AbkMainVps -AppRoot $mainApp -DataRoot $mainApp -SshConfig (Join-Path $sshLab 'none')
+    Test-Step -Title 'без записи и маршрутов имён MAIN VPS нет' -Ok ($none.Source -eq 'none' -and -not $none.Host -and -not $none.CloudflaredHost)
+    $added = Set-AbkMainVpsCloudflared -Path $mainTargets -Value 'door.example.invalid'
+    $addedBack = Get-Content -LiteralPath $mainTargets -Raw | ConvertFrom-Json
+    Test-Step -Title 'имя для cloudflared встаёт в запись server' `
+        -Ok ($added -and $addedBack.server.cloudflaredHost -eq 'door.example.invalid' -and $addedBack.server.sshHost -eq 'audion-vps-direct')
+    $changed = Set-AbkMainVpsCloudflared -Path $mainTargets -Value 'other.example.invalid'
+    $fromTargets = Get-AbkMainVps -AppRoot $mainApp -DataRoot $mainApp -SshConfig $mainConfig
+    Test-Step -Title 'имя для cloudflared меняется на месте, берётся из targets' `
+        -Ok ($changed -and $fromTargets.CloudflaredHost -eq 'other.example.invalid' -and $fromTargets.Source -eq 'targets')
+    Test-Step -Title 'то же имя второй раз ничего не меняет' -Ok (-not (Set-AbkMainVpsCloudflared -Path $mainTargets -Value 'other.example.invalid'))
+    # sshHost - последнее поле записи: запятая переходит к нему, новое поле встаёт последним.
+    $lastFile = Join-Path $sshLab 'last.json'
+    [System.IO.File]::WriteAllText($lastFile, "{`r`n  `"server`": {`r`n    `"host`": `"`",`r`n    `"sshHost`": `"audion-vps-direct`"`r`n  }`r`n}`r`n")
+    $lastOk = Set-AbkMainVpsCloudflared -Path $lastFile -Value 'door.example.invalid'
+    Test-Step -Title 'поле встаёт и за последним sshHost' `
+        -Ok ($lastOk -and (Get-Content -LiteralPath $lastFile -Raw | ConvertFrom-Json).server.cloudflaredHost -eq 'door.example.invalid')
 } finally {
     Remove-Item -LiteralPath $sshLab -Recurse -Force -ErrorAction SilentlyContinue
 }

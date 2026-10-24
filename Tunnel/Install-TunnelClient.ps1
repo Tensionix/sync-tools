@@ -70,6 +70,8 @@ $SshKeyDir = Join-Path $DataRoot 'Tunnel\SSH'
 # свои и лежат в targets.json.
 . (Join-Path $ProjectDir 'Engine\Targets.ps1')
 $SecondVps = Get-AbkSecondVps -AppRoot $ProjectDir -DataRoot $DataRoot
+# Both names of MAIN VPS are the household's: targets.json, or the routes this machine already has.
+$MainVps = Get-AbkMainVps -AppRoot $ProjectDir -DataRoot $DataRoot
 
 function Resolve-Key {
     <#
@@ -112,8 +114,8 @@ function Format-KeyPath {
 $VpsKey      = Resolve-Key 'audion_vps_root_ed25519'
 $SecondKey   = Resolve-Key $SecondVps.Key
 
-$VpsHostname   = 'ssh.audion.dev'
-$VpsAddress    = 'direct.audion.dev'
+$VpsHostname   = [string]$MainVps.CloudflaredHost
+$VpsAddress    = [string]$MainVps.Host
 
 $SshDir     = Join-Path $HOME '.ssh'
 $SshConfig  = Join-Path $SshDir 'config'
@@ -235,16 +237,20 @@ function Show-TabbyHint {
     $besideHostApp = Test-Path (Join-Path $dir 'Tabby.exe')
 
     Write-Host ''
-    Write-Host 'Профиль Tabby: хост ssh.audion.dev, порт 22, пользователь root.' -ForegroundColor Cyan
+    if (-not $VpsHostname) {
+        Write-Warn 'имени MAIN VPS для cloudflared нет: SETUP → АДРЕСА, поле MAIN VPS: ИМЯ ДЛЯ CLOUDFLARED'
+        return
+    }
+    Write-Host "Профиль Tabby: хост $VpsHostname, порт 22, пользователь root." -ForegroundColor Cyan
     Write-Host 'В поле «Proxy command»:' -ForegroundColor Cyan
 
     if ($besideHostApp) {
         # exe лежит рядом с Tabby.exe — путь не нужен, Windows найдёт его сам.
-        Write-Host '  cloudflared access ssh --hostname ssh.audion.dev'
+        Write-Host "  cloudflared access ssh --hostname $VpsHostname"
         Write-Step 'без пути: exe лежит рядом с Tabby.exe, профиль переживёт переезд'
     }
     else {
-        Write-Host "  `"$CloudflaredPath`" access ssh --hostname ssh.audion.dev"
+        Write-Host "  `"$CloudflaredPath`" access ssh --hostname $VpsHostname"
         Write-Step 'путь абсолютный: чтобы обойтись без него, положите cloudflared.exe рядом с Tabby.exe'
     }
 }
@@ -257,10 +263,11 @@ function New-SshConfigBlock {
     $proxy = "`"$CloudflaredPath`" access ssh --hostname %h"
 
     $SecondBlock = New-SecondVpsBlock
-    return @"
-$MarkBegin
-# Создано Install-TunnelClient.ps1. Правки внутри блока перезаписываются.
-
+    # Each route of MAIN VPS needs its name from targets.json (or from the block written before): a
+    # route without one is left out and said, never written to an address guessed by the program.
+    $CloudBlock = ''
+    if ($VpsHostname) {
+        $CloudBlock = @"
 # Основной маршрут: канал строит сам MAIN VPS, наш адрес в схеме не участвует.
 Host audion-vps
     HostName $VpsHostname
@@ -272,7 +279,13 @@ Host audion-vps
     ServerAliveInterval 30
     ServerAliveCountMax 3
     StrictHostKeyChecking accept-new
-
+"@
+    } else {
+        Write-Warn 'audion-vps не прописан: имени MAIN VPS для cloudflared нет в targets.json - SETUP → АДРЕСА'
+    }
+    $DirectBlock = ''
+    if ($VpsAddress) {
+        $DirectBlock = @"
 # Запасной: прямо по адресу. Из России не работает, под VPN — быстрее туннеля.
 # HostKeyAlias тот же, поэтому отпечаток сверяется с одной записью known_hosts
 # независимо от маршрута: подмена на пути будет замечена.
@@ -283,6 +296,17 @@ Host audion-vps-direct
     IdentitiesOnly yes
     HostKeyAlias audion-vps
     ServerAliveInterval 30
+"@
+    } else {
+        Write-Warn 'audion-vps-direct не прописан: адреса MAIN VPS нет в targets.json - SETUP → АДРЕСА'
+    }
+    return @"
+$MarkBegin
+# Создано Install-TunnelClient.ps1. Правки внутри блока перезаписываются.
+
+$CloudBlock
+
+$DirectBlock
 
 $SecondBlock
 $MarkEnd
@@ -384,16 +408,20 @@ function Test-Setup {
     # Имя должно резолвиться. Тип не проверяем: при включённом прокси Cloudflare
     # отдаёт A-записи своих серверов, а не CNAME на туннель, — CNAME виден только
     # в панели. Пока запись не создана, здесь пусто; это самая частая причина отказа.
-    try {
-        $answers = @(Resolve-DnsName -Name $VpsHostname -ErrorAction Stop |
-                     Where-Object { $_.IPAddress -or $_.NameHost })
-        if (-not $answers) { throw 'пустой ответ' }
-        $shown = ($answers | ForEach-Object { if ($_.IPAddress) { $_.IPAddress } else { $_.NameHost } }) -join ', '
-        Write-Good "$VpsHostname → $shown"
-    }
-    catch {
-        Write-Warn "$VpsHostname не резолвится — создайте в Cloudflare DNS запись:"
-        Write-Step 'тип CNAME, имя ssh, значение <ID туннеля>.cfargotunnel.com, прокси включён'
+    if (-not $VpsHostname) {
+        Write-Warn 'имени MAIN VPS для cloudflared нет в targets.json - SETUP → АДРЕСА'
+    } else {
+        try {
+            $answers = @(Resolve-DnsName -Name $VpsHostname -ErrorAction Stop |
+                         Where-Object { $_.IPAddress -or $_.NameHost })
+            if (-not $answers) { throw 'пустой ответ' }
+            $shown = ($answers | ForEach-Object { if ($_.IPAddress) { $_.IPAddress } else { $_.NameHost } }) -join ', '
+            Write-Good "$VpsHostname → $shown"
+        }
+        catch {
+            Write-Warn "$VpsHostname не резолвится — создайте в Cloudflare DNS запись:"
+            Write-Step 'тип CNAME, имя ssh, значение <ID туннеля>.cfargotunnel.com, прокси включён'
+        }
     }
 
     if (Test-Path $SshConfig) {

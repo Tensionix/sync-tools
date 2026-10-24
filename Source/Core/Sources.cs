@@ -94,7 +94,7 @@ public static class Sources
             new Source { Key = "media", Label = "R2 MEDIA", Remote = "r2:audion-media", Tip = "R2 bucket с видео и картинками — то, что показывают страницы и заметки." },
             new Source { Key = "vault", Label = "R2 VAULT", Remote = "r2:audion-vault", Tip = "Общее хранилище заметок портала vault.audion.dev — то, что портал показывает без ключа v в адресе." },
             new Source { Key = "daily", Label = "СНИМКИ", Remote = "r2:audion-backup/daily", Tip = "Ночные снимки MAIN VPS по датам — источник для зеркала." },
-            new Source { Key = "data", Label = "ДАННЫЕ", Root = data, Tip = "Папка данных: снимки, шесть зеркал, ключи Tunnel\\SSH." },
+            new Source { Key = "data", Label = "ДАННЫЕ", Root = data, Tip = "Папка данных: снимки, библиотека репозиториев, ключи Tunnel\\SSH." },
             new Source { Key = "store", Label = "GOLDEN COPY", Root = Path.Combine(data, "Tunnel", "SSH"), Tip = "Golden copy ключей - Tunnel\\SSH. EXPORT KEYS в неё не пишет никогда." },
             new Source { Key = "kit", Label = "EXPORT KEYS", Root = Path.Combine(data, "Tunnel", "Export"), Tip = "Export Keys - ключи, собранные с живой машины: их предпочитает IMPORT KEYS." },
             new Source { Key = "profile", Label = "ПРОФИЛЬ", Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"), Tip = "Профиль пользователя — место, где ключи ищет ssh." },

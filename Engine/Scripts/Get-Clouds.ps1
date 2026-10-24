@@ -64,6 +64,10 @@ if ($Save) {
 }
 
 if ($Open) {
+    if (Test-Path -LiteralPath (Join-Path $data '._runtime\session.conf')) {
+        . (Join-Path $AppRoot 'Engine\StorageLayout.ps1')
+        [void](Move-AbkRuntimeStorage -AppRoot $AppRoot -DataRoot $data)
+    }
     $config = Get-AbkCloudsPath -AppRoot $AppRoot -DataRoot $data
     $ready = $password -and (Test-Path -LiteralPath $config) -and (Test-AbkCloudsOpen -AppRoot $AppRoot -DataRoot $data -RcloneExe $exe)
     if (-not $ready) { [ordered]@{ ready = $false; why = 'none'; clouds = @() } | ConvertTo-Json -Compress; exit 0 }

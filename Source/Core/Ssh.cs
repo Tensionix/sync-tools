@@ -78,6 +78,25 @@ public static class Ssh
     {
         if (name.Length == 0) return false;
         if (Names().Contains(name)) return true;
+        if (Resolve(name) is not { } options) return false;
+        foreach (var jump in new[] { "proxyjump", "proxycommand" })
+            if (options.TryGetValue(jump, out var value) && value.Length > 0 && value != "none") return true;
+        return options.TryGetValue("hostname", out var resolved) && resolved.Length > 0 && resolved != name;
+    }
+
+    /// <summary>
+    /// The address a host of ~\.ssh\config leads to ("ssh -G"); empty when ssh knows no other one.
+    /// A machine set up before targets.json named MAIN VPS keeps its names here only.
+    /// </summary>
+    public static string HostNameOf(string name)
+    {
+        if (name.Length == 0 || Resolve(name) is not { } options) return "";
+        return options.TryGetValue("hostname", out var resolved) && resolved != name ? resolved : "";
+    }
+
+    /// <summary>The options "ssh -G" gives for a name; null when ssh does not answer.</summary>
+    static Dictionary<string, string>? Resolve(string name)
+    {
         try
         {
             var info = new ProcessStartInfo("ssh.exe")
@@ -88,22 +107,20 @@ public static class Ssh
             info.ArgumentList.Add("-G");
             info.ArgumentList.Add(name);
             using var process = Process.Start(info);
-            if (process is null) return false;
+            if (process is null) return null;
             process.StandardInput.Close();
             var output = process.StandardOutput.ReadToEndAsync();
             _ = process.StandardError.ReadToEndAsync();
-            if (!process.WaitForExit(5000)) { try { process.Kill(); } catch { } return false; }
-            if (process.ExitCode != 0) return false;
+            if (!process.WaitForExit(5000)) { try { process.Kill(); } catch { } return null; }
+            if (process.ExitCode != 0) return null;
             var options = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var row in output.Result.Split('\n'))
             {
                 var parts = row.Trim().Split(new[] { ' ', '\t' }, 2, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length == 2 && !options.ContainsKey(parts[0])) options[parts[0]] = parts[1];
             }
-            foreach (var jump in new[] { "proxyjump", "proxycommand" })
-                if (options.TryGetValue(jump, out var value) && value.Length > 0 && value != "none") return true;
-            return options.TryGetValue("hostname", out var resolved) && resolved.Length > 0 && resolved != name;
+            return options;
         }
-        catch { return false; }
+        catch { return null; }
     }
 }

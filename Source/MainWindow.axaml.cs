@@ -121,7 +121,10 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (!await PrepareData()) return;
+            bool changed = await PrepareData();
+            // Durable migration must finish before a new cloud session can replace an old one.
+            OpenClouds();
+            if (!changed) return;
             // The frame of the addresses appeared, or the working files an old version left came
             // into the data folder: what was read and shown before them is read again.
             Sources.Rebuild();
@@ -154,7 +157,6 @@ public partial class MainWindow : Window
         WatchNetwork();
         StartProbe(quiet: true);
         FindLegacyTask();
-        OpenClouds();
         RefreshState();
         ShowState();
         PrepareAtStart();

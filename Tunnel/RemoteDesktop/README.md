@@ -92,7 +92,7 @@ REVERSE SSH TUN — `reverse-ssh-*`; the route check — `check-routes`.*
 
     base, laptop, home, work        машины: lan и host, порты рабочего стола и файлов, user
     router-base, router-home, ...   роутеры: только файлы, вход паролем (keyAuth=false)
-    server                          MAIN VPS: sshHost - имя хоста из ~\.ssh\config
+    server                          MAIN VPS: host - имя для прямого пути, cloudflaredHost - для cloudflared, sshHost - хост в ~\.ssh\config
     second                          SECOND VPS: host, sshHost, sshHostCf, key, user
 
 `lan` — адрес для прямого маршрута, `host` — адрес той же машины со стороны

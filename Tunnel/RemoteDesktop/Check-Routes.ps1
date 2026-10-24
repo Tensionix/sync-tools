@@ -53,6 +53,8 @@ $AppRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 . (Join-Path $AppRoot 'Engine\Targets.ps1')
 $DataRoot = Get-AbkDataRootPath -AppRoot $AppRoot -Root $Root
 $SecondVps = Get-AbkSecondVps -AppRoot $AppRoot -DataRoot $DataRoot
+# The names of MAIN VPS are the household's: targets.json, or the routes of this machine's ~\.ssh\config.
+$MainVps = Get-AbkMainVps -AppRoot $AppRoot -DataRoot $DataRoot
 # Адреса стационара и роутера - из targets.json (поле lan).
 $BaseLan = ''
 $RouterLan = ''
@@ -103,8 +105,8 @@ Say 'Сеть:' Cyan
 foreach ($target in @(
     @{ Name = 'дом, BASE';        Address = $BaseLan;             Port = 22 }
     @{ Name = 'дом, роутер';      Address = $RouterLan;           Port = 22 }
-    @{ Name = 'MAIN VPS по имени';  Address = 'direct.audion.dev';  Port = 22 }
-    @{ Name = 'cloudflare';       Address = 'ssh.audion.dev';     Port = 443 }
+    @{ Name = 'MAIN VPS по имени';  Address = $MainVps.Host;            Port = 22 }
+    @{ Name = 'cloudflare';       Address = $MainVps.CloudflaredHost;  Port = 443 }
     @{ Name = 'SECOND VPS';       Address = $SecondVps.Host;      Port = $SecondVps.Port }
 )) {
     if (-not $target.Address) { continue }

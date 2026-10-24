@@ -20,8 +20,8 @@ try {
     $backup = New-AbkMirrorBackup -DataRoot $data
     $acl = Get-Acl -LiteralPath $backup
     $allowed = @([Security.Principal.WindowsIdentity]::GetCurrent().User.Value, 'S-1-5-18', 'S-1-5-32-544')
-    Assert ($backup.StartsWith((Join-Path $data '._runtime\mirror-')) -and $acl.AreAccessRulesProtected -and
-        @($acl.Access | Where-Object { $_.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value -notin $allowed }).Count -eq 0) 'MIRROR backup lives in DATA\._runtime with a closed ACL'
+    Assert ($backup.StartsWith((Join-Path $data 'Recovery\mirror-')) -and $acl.AreAccessRulesProtected -and
+        @($acl.Access | Where-Object { $_.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value -notin $allowed }).Count -eq 0) 'MIRROR backup lives in DATA\Recovery with a closed ACL'
 
     $profile = Join-Path $lab 'profile\.ssh'
     Put (Join-Path $profile 'old_key') 'OLD PRIVATE'

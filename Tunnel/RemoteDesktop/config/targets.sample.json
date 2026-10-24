@@ -3,10 +3,11 @@
 
   "server": {
     "desc": "MAIN VPS",
-    "_note": "Домашнего адреса у него нет: ходим по имени. Хосты audion-vps-direct и audion-vps уже описаны в ~/.ssh/config, второй идёт поверх cloudflared.",
+    "_note": "Домашнего адреса у него нет: ходим по имени. host - имя для прямого пути, cloudflaredHost - имя, по которому до него ходит cloudflared; оба пишет SETUP → АДРЕСА, по ним клиент туннеля прописывает хосты audion-vps-direct и audion-vps в ~/.ssh/config.",
     "lan": "",
     "host": "",
     "sshHost": "audion-vps-direct",
+    "cloudflaredHost": "",
     "sshPort": 22,
     "user": ""
   },

@@ -13,6 +13,7 @@ public partial class MainWindow
     const string CellPort = "ПОРТ";
     const string SecondHostLabel = "SECOND VPS: ИМЯ ХОСТА В ~\\.ssh\\config";
     const string SecondCfLabel = "SECOND VPS: ИМЯ ПОВЕРХ CLOUDFLARED";
+    const string MainCfLabel = "MAIN VPS: ИМЯ ДЛЯ CLOUDFLARED";
     const string SecondKeyLabel = "SECOND VPS: ИМЯ КЛЮЧА В Tunnel\\SSH\\servers";
     const string TargetsHead = "Адреса машин";
     const string TargetsOk = "ЗАПИСАТЬ";

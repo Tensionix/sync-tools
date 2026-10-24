@@ -264,7 +264,7 @@ Test-Step -Title 'у каждого враппера есть кнопка' -Ok 
 # Сценарии, которых кнопка не зовёт напрямую, но дверь у них есть.
 $scriptDoors = $code
 # Сценарии без кнопки по замыслу: сейчас таких нет. Появится - сюда, с причиной в комментарии.
-$byBuild = @()
+$byBuild = @('Migrate-RuntimeStorage.ps1') # Offline maintenance/migration, no separate GUI action.
 # RESTORE - намеренная цепочка: враппер -> сценарий восстановления -> проверка маршрутов.
 $restoreWrapper = [System.IO.File]::ReadAllText((Join-Path $AppRoot 'Tunnel\RemoteDesktop\restore-machine.cmd'))
 $restoreCode = [System.IO.File]::ReadAllText((Join-Path $AppRoot 'Engine\Scripts\Restore-Machine.ps1'))

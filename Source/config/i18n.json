@@ -5,8 +5,8 @@
  "Начисто из DATA (MIRROR)": {
   "en": "Clean from DATA (MIRROR)"
  },
- "После переустановки: C: ровно как в DATA, лишнее - в DATA\\._runtime. Ждёт UAC, вход в Access и пароли роутеров": {
-  "en": "After a reinstall: C: exactly as in DATA, the rest goes to DATA\\._runtime. Waits for UAC, Access sign-in and router passwords"
+ "После переустановки: C: ровно как в DATA, лишнее - в DATA\\Recovery. Ждёт UAC, вход в Access и пароли роутеров": {
+  "en": "After a reinstall: C: exactly as in DATA, the rest goes to DATA\\Recovery. Waits for UAC, Access sign-in and router passwords"
  },
  "Восстановить эту машину": {
   "en": "Restore this machine"
@@ -272,8 +272,8 @@
  "Посмотреть, что войдёт, не отправляя, — кнопка DRY RUN.": {
   "en": "To see what would go without sending, use DRY RUN."
  },
- "Обновить все зеркала?": {
-  "en": "Refresh every mirror?"
+ "Обновить библиотеку?": {
+  "en": "Refresh the library?"
  },
  "ОТКУДА: MAIN VPS": {
   "en": "FROM: MAIN VPS"
@@ -281,8 +281,8 @@
  "КУДА  : {0}": {
   "en": "TO  : {0}"
  },
- "Местная копия равняется по MAIN VPS: чего на MAIN VPS нет, того не станет и здесь.": {
-  "en": "The local copy is levelled to MAIN VPS: what is not there will not stay here."
+ "Режим MIR: локальные правки и лишние файлы в зеркалах удаляются. Ключи, подключения и recovery-снимки защищены.": {
+  "en": "MIR mode: local edits and extra files in mirrors are removed. Keys, connections and recovery snapshots are protected."
  },
  "Посмотреть, что изменится, не трогая файлы, — кнопка DRY RUN.": {
   "en": "To see what would change without touching files, use DRY RUN."
@@ -500,9 +500,6 @@
  "По местному адресу из targets.json, без jump host. Работает, когда вы в той же сети или когда поднят путь домой; в чужой сети упрётся в тишину. Остальные кнопки ряда идут через jump host, эта единственная — напрямую.": {
   "en": "By the local address from targets.json, with no jump host. Works when you are on the same network or while the way home is up; on a foreign network it runs into silence. The other buttons in the row go through a jump host; this one alone goes direct."
  },
- "До машины через MAIN VPS по имени direct.audion.dev. Если машина держит на нём свой SSH TUN — идём в него: так работает и та, до которой снаружи не достучаться вовсе, за чужим NAT или в мобильной сети. Туннеля нет — идём к её адресу через jump host MAIN VPS; сессия встаёт быстрее всего из дальних маршрутов, но имя ведёт на адрес, а адрес можно заблокировать.": {
-  "en": "To the machine through MAIN VPS by the name direct.audion.dev. If the machine holds its own SSH TUN there, we go into it: that way even a machine unreachable from outside works - behind someone else's NAT or on a mobile network. Without that tunnel we go to its address through the MAIN VPS jump host; the session comes up fastest of the far routes, but a name leads to an address, and an address can be blocked."
- },
  "Тот же MAIN VPS, но поверх cloudflared: соединение идёт на адреса Cloudflare по 443 и выглядит обычным HTTPS. Медленнее ставит сессию, зато блокировать в нём нечего.": {
   "en": "The same MAIN VPS, but over cloudflared: the connection goes to Cloudflare addresses on 443 and looks like ordinary HTTPS. Slower to establish a session, but there is nothing in it to block."
  },
@@ -596,14 +593,14 @@
  "RELEASE - папка, откуда PRIVATE BACKUP берёт приватные архивы Build-стека: _archives_private_full и _archives_private_git. Индикатор зелёный, когда путь выбран и архивы внутри.": {
   "en": "RELEASE - the folder PRIVATE BACKUP takes the private Build-stack archives from: _archives_private_full and _archives_private_git. The indicator is green when the path is chosen and the archives are inside."
  },
- "Скачивает последний ночной снимок из r2:audion-backup/daily, сверяет сумму, кладёт целиком в Snapshots и раскладывает по шести папкам. Planning Signals и Audion Share тянутся прямо с MAIN VPS по ssh.": {
-  "en": "Downloads the latest night snapshot from r2:audion-backup/daily, verifies the checksum, keeps it whole in Snapshots and unpacks it into six folders. Planning Signals and Audion Share are pulled straight from MAIN VPS over ssh."
+ "MIR: заменяет библиотеку проверенными серверными копиями, находит новые репозитории, удаляет локальное лишнее и старые копии после успеха. Ключи, подключения и recovery-снимки защищены.": {
+  "en": "MIR: replaces the library with verified server copies, discovers new repositories, removes local extras and old copies after success. Keys, connections and recovery snapshots are protected."
  },
- "То же, но только для папок, отмеченных в списке. Снимок скачивается, лишь когда среди отмеченных есть та, что берётся из него.": {
-  "en": "The same, but only for the folders ticked in the list. The snapshot is downloaded only when one of the ticked folders comes from it."
+ "Устанавливает только отмеченные папки. Полнота снимка и репозиториев всё равно проверяется; остальные рабочие папки не заменяются.": {
+  "en": "Installs only selected folders. Snapshot and repository completeness is still verified; other working folders are not replaced."
  },
- "Проба: показывает, что будет обновлено, и ничего не пишет. Доступ к R2 bucket проверяется по-настоящему.": {
-  "en": "A dry run: shows what would be updated and writes nothing. Access to the R2 bucket is checked for real."
+ "Показывает обнаруженные репозитории и план обновления. Читает MAIN VPS по SSH, не скачивает архив и ничего не меняет в DATA.": {
+  "en": "Shows discovered repositories and the update plan. Reads MAIN VPS over SSH, does not download the archive or change DATA."
  },
  "Ежедневное задание в Планировщике Windows на 03:20 от имени нынешнего пользователя. Повторный запуск переписывает задание, а не плодит второе.": {
   "en": "A daily task in the Windows Task Scheduler at 03:20 under the current user. Running it again rewrites the task rather than adding a second one."
@@ -947,8 +944,8 @@
  "Ночные снимки MAIN VPS по датам — источник для зеркала.": {
   "en": "Night MAIN VPS snapshots by date — the source for the mirror."
  },
- "Папка данных: снимки, шесть зеркал, ключи Tunnel\\SSH.": {
-  "en": "The data folder: snapshots, six mirrors, the Tunnel\\SSH keys."
+ "Папка данных: снимки, библиотека репозиториев, ключи Tunnel\\SSH.": {
+  "en": "The data folder: snapshots, the repository library, the Tunnel\\SSH keys."
  },
  "Golden copy ключей - Tunnel\\SSH. EXPORT KEYS в неё не пишет никогда.": {
   "en": "The golden copy of the keys - Tunnel\\SSH. EXPORT KEYS never writes into it."
@@ -1394,8 +1391,8 @@
  "перенесено в папку данных: файлов {0}": {
   "en": "moved into the data folder: {0} file(s)"
  },
- "копии из программы, отличные от данных, убраны в карантин ._runtime\\migrated": {
-  "en": "program copies that differ from the data were quarantined into ._runtime\\migrated"
+ "копии из программы, отличные от данных, убраны в карантин Recovery\\migrated": {
+  "en": "program copies that differ from the data were quarantined into Recovery\\migrated"
  },
  "Ключи к R2 bucket в папке данных.": {
   "en": "The R2 bucket keys in the data folder."
@@ -2216,6 +2213,12 @@
  "SECOND VPS: ИМЯ ХОСТА В ~\\.ssh\\config": {
   "en": "SECOND VPS: HOST NAME IN ~\\.ssh\\config"
  },
+ "MAIN VPS: ИМЯ ДЛЯ CLOUDFLARED": {
+  "en": "MAIN VPS: NAME FOR CLOUDFLARED"
+ },
+ "адреса MAIN VPS нет в targets.json - SETUP → АДРЕСА": {
+  "en": "no address of MAIN VPS in targets.json - SETUP → ADDRESSES"
+ },
  "SECOND VPS: ИМЯ ПОВЕРХ CLOUDFLARED": {
   "en": "SECOND VPS: NAME OVER CLOUDFLARED"
  },
@@ -2521,9 +2524,6 @@
  },
  "SECOND VPS по ssh. Из дома маршрут прямой, из сетей с фильтрацией его ssh рвут — тогда работает запасной поверх cloudflared. Отсюда файл уходит и на машины, и в R2.": {
   "en": "SECOND VPS over ssh. From home the route is direct; filtered networks reset its ssh — then the spare route over cloudflared works. From here a file goes both to the machines and to R2."
- },
- "Через MAIN VPS по имени direct.audion.dev: в SSH TUN машины, если он заведён, иначе через jump host.": {
-  "en": "Through MAIN VPS by the name direct.audion.dev: into the machine's SSH TUN if it has one, otherwise through the jump host."
  },
  "GOLDEN COPY → MAIN VPS": {
   "en": "GOLDEN COPY → MAIN VPS"

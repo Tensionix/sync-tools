@@ -289,3 +289,7 @@ Source/obj/
 Source/Ps/bin/
 Source/Ps/obj/
 App/
+
+# Offline rollback binaries only. Machine state and secrets belong in DATA.
+Recovery/
+config/terminal/

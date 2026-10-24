@@ -1,6 +1,6 @@
 # Audion Sync Tools — user guide
 
-[Русский](USER_GUIDE_RU.md) · [Changelog](CHANGELOG_EN.md)
+[Русский](USER_GUIDE_RU.md) · [Changelog](CHANGELOG_EN.md) · [SYNC ALL](SYNC_ALL_EN.md)
 
 **Contents**
 
@@ -81,7 +81,7 @@ up at all. It has to come up first on an empty machine, before everything else.
    the paths in `~\.ssh\config` that lead nowhere. Server pairs missing from
    Export Keys are taken from `Tunnel\SSH\servers`. Existing private keys are
    kept and their permissions checked; `-Check` only reports the state.
-4. `STORAGE` → `SYNC ALL` — the first filling of the mirror. After that the same
+4. `STORAGE` → `SYNC ALL` — the first filling of the library. After that the same
    button or `sync-backup.cmd` refreshes it: the program creates no Windows
    Scheduler tasks, and MAIN VPS takes its nightly snapshot by its own timer.
 
@@ -90,7 +90,7 @@ say — no client of our own is needed: the tunnels will run on that one. The
 `WIREGUARD` button will show this and install nothing.
 
 To confirm it all landed: `Tunnel\check-tunnel-client.cmd` shows the tunnel
-client and the routes, `sync-backup.cmd -WhatIf` shows access to the R2 bucket.
+client and the routes, `sync-backup.cmd -WhatIf` shows the Git catalog and update plan.
 
 ## The window
 
@@ -250,6 +250,13 @@ name. Older installations have names of their own; the window moves them over
 from `~\.ssh\config` at start, and the fields let you correct them. After
 writing, the window checks `~\.ssh\config` and says when a name still has to be
 written there with `INSTALL`.
+
+The `MAIN VPS` row holds its name for the straight road, and the field
+`MAIN VPS: NAME FOR CLOUDFLARED` below the table the name cloudflared goes to it by.
+Both are addresses of the household: they live in `targets.json` of the data
+folder, the program holds neither. Until the field is filled in, the window and the
+tunnel client take the names from this machine's `~\.ssh\config` - the hosts
+`audion-vps-direct` and `audion-vps` - and the field starts from them.
 
 `R2 CREDS` asks for the id and the secret — the Cloudflare panel issues them
 under R2 - Manage API tokens — and writes them into the file `rclone` reads.
@@ -1081,7 +1088,7 @@ The machine's profile lives there too — everything that sets it apart from the
 same program on someone else's computer:
 
     config\rclone\                 rclone.conf and keys to the R2 bucket
-    config\mirror.json             the mirror plan: which folder pulls from MAIN VPS or SECOND VPS
+    config\mirror.json             the SYNC ALL plan: MAIN VPS, the R2 bucket, repositories and folders
     Tunnel\RemoteDesktop\config\   machine addresses and the router password
 
 Window settings — `config\gui-settings.json` — are not part of it: they belong

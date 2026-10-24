@@ -56,7 +56,7 @@ To confirm it all landed: the `DIAGNOSTICS` button in the TUNNEL section, or
 tunnel client. There is not a single file here that would be painful to lose:
 no keys, no addresses, no passwords — only a pointer to the profile.
 
-**The data** is the neighbouring `Audion Backup`: snapshots, six mirrors of
+**The data** is the neighbouring `Audion Backup`: snapshots, a library of
 MAIN VPS's code, keys, tokens. There is not a single executable file there.
 
 **The machine profile** is the data folder itself: every machine has its own,
@@ -205,8 +205,14 @@ never copied there, only paths and purposes.
 `rclone` and its own keys; a change that brings back a tie to the neighbours is
 a wrong change.
 
-**Do not clean the data.** `Audion Backup` is not deleted and not "put in
-order": the keys, the tokens and the only local copy of MAIN VPS are there.
+**MIR only inside the library.** SYNC ALL replaces managed mirrors, removing local
+edits and extra files there. Tunnel, connections, full Snapshots and explicitly
+protected secrets are not cleaned. Temporary old copies are removed after verification.
+
+**._runtime is disposable.** With the program closed and CLI operations finished,
+it can be deleted both here and in DATA. Cloud sessions and BISYNC belong only to
+DATA/config; recovery journals and backup settings belong to DATA/Recovery. Legacy
+files migrate with hash checks: [SYNC ALL](SYNC_ALL_EN.md#deleting-_runtime).
 
 **A button calls a wrapper.** Nothing must happen in the window that cannot be
 done from a console — otherwise the window and the wrappers drift apart.

@@ -454,6 +454,41 @@ function New-AbkSessionConfig {
 
     $plain = Get-AbkWorkPath -AppRoot $AppRoot -DataRoot $DataRoot -Rel 'config\rclone\rclone.conf'
     $clouds = Get-AbkCloudsPath -AppRoot $AppRoot -DataRoot $DataRoot
+    $folder = Get-AbkWorkPath -AppRoot $AppRoot -DataRoot $DataRoot -Rel 'config\rclone'
+    $session = Join-Path $folder 'session.conf'
+    $baseline = $session + '.source.sha256'
+    # A previous crash may have left newer OAuth tokens in the durable session.
+    # Persist and verify them before rebuilding; never overwrite the only fresh token.
+    if (Test-Path -LiteralPath $session) {
+        $savedText = Get-AbkConfigText -AppRoot $AppRoot -DataRoot $DataRoot -RcloneExe $RcloneExe -Path $session -Password $Password
+        if (-not $savedText.Trim()) { throw 'Saved cloud session cannot be read; it has not been overwritten' }
+        $canonicalChanged = if (Test-Path -LiteralPath $baseline) {
+            [IO.File]::ReadAllText($baseline).Trim() -ne (Get-FileHash -LiteralPath $clouds -Algorithm SHA256).Hash
+        } else {
+            (Get-Item -LiteralPath $clouds).LastWriteTimeUtc -gt (Get-Item -LiteralPath $session).LastWriteTimeUtc
+        }
+        if ($canonicalChanged) {
+            # Reconnect/rename in another process may be newer than this old session.
+            # Retain its exact encrypted bytes, then use the explicit canonical change.
+            $history = Get-AbkWorkPath -AppRoot $AppRoot -DataRoot $DataRoot -Rel 'Recovery\cloud-sessions'
+            [void][IO.Directory]::CreateDirectory($history)
+            if (Get-Command Protect-AbkSecret -ErrorAction SilentlyContinue) { [void](Protect-AbkSecret -Path $history) }
+            $savedHash = (Get-FileHash -LiteralPath $session -Algorithm SHA256).Hash
+            $archive = Join-Path $history ($savedHash + '.conf')
+            if (-not (Test-Path -LiteralPath $archive)) { Copy-Item -LiteralPath $session -Destination $archive }
+            if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $savedHash) { throw 'Cloud session archive verification failed' }
+        } else {
+            [void](Save-AbkCloudChanges -AppRoot $AppRoot -DataRoot $DataRoot -RcloneExe $RcloneExe -Password $Password -SessionPath $session)
+        }
+        $savedSections = Split-AbkConfigSections -Text $savedText
+        $keptText = Get-AbkConfigText -AppRoot $AppRoot -DataRoot $DataRoot -RcloneExe $RcloneExe -Path $clouds -Password $Password
+        $keptSections = Split-AbkConfigSections -Text $keptText
+        foreach ($key in $keptSections.Keys) {
+            if (-not $canonicalChanged -and $savedSections.Contains($key) -and $keptSections[$key] -ne $savedSections[$key]) {
+                throw 'Saved cloud session could not be persisted; it has not been overwritten'
+            }
+        }
+    }
 
     $transportText = Get-AbkConfigText -AppRoot $AppRoot -DataRoot $DataRoot -RcloneExe $RcloneExe -Path $plain
     $cloudText = Get-AbkConfigText -AppRoot $AppRoot -DataRoot $DataRoot -RcloneExe $RcloneExe -Path $clouds -Password $Password
@@ -478,17 +513,17 @@ function New-AbkSessionConfig {
         $lines.Add('') | Out-Null
     }
 
-    $folder = Get-AbkWorkPath -AppRoot $AppRoot -DataRoot $DataRoot -Rel '._runtime'
     if (-not (Test-Path -LiteralPath $folder)) { New-Item -ItemType Directory -Path $folder -Force | Out-Null }
-    $session = Join-Path $folder 'session.conf'
+    $pendingSession = $session + '.new-' + [guid]::NewGuid().ToString('N')
 
-    [System.IO.File]::WriteAllText($session, ($lines -join "`n"), [System.Text.UTF8Encoding]::new($false))
+    [System.IO.File]::WriteAllText($pendingSession, ($lines -join "`n"), [System.Text.UTF8Encoding]::new($false))
+    if (Get-Command Protect-AbkSecret -ErrorAction SilentlyContinue) { [void](Protect-AbkSecret -Path $pendingSession) }
 
     # Шифруем тем же паролем: файл живёт рядом с программой, и открытым ему
     # лежать незачем.
     $psi = [System.Diagnostics.ProcessStartInfo]::new()
     $psi.FileName = $RcloneExe
-    $psi.Arguments = '--config "{0}" config encryption set' -f $session
+    $psi.Arguments = '--config "{0}" config encryption set' -f $pendingSession
     $psi.UseShellExecute = $false
     $psi.CreateNoWindow = $true
     $psi.RedirectStandardInput = $true
@@ -509,8 +544,10 @@ function New-AbkSessionConfig {
     # Права на файл ставит соседний модуль. Он есть не в каждом вызове -
     # эта библиотека подключается и там, где окна нет вовсе.
     if (Get-Command Protect-AbkSecret -ErrorAction SilentlyContinue) {
-        [void](Protect-AbkSecret -Path $session)
+        [void](Protect-AbkSecret -Path $pendingSession)
     }
+    Move-Item -LiteralPath $pendingSession -Destination $session -Force
+    [IO.File]::WriteAllText($baseline, (Get-FileHash -LiteralPath $clouds -Algorithm SHA256).Hash, [Text.UTF8Encoding]::new($false))
     return $session
 }
 
@@ -536,6 +573,11 @@ function Save-AbkCloudChanges {
     if (-not (Test-Path -LiteralPath $SessionPath)) { return 0 }
 
     $clouds = Get-AbkCloudsPath -AppRoot $AppRoot -DataRoot $DataRoot
+    $baseline = $SessionPath + '.source.sha256'
+    if ((Test-Path -LiteralPath $baseline) -and
+        [IO.File]::ReadAllText($baseline).Trim() -ne (Get-FileHash -LiteralPath $clouds -Algorithm SHA256).Hash) {
+        return 0 # Do not overwrite an explicit reconnect/rename made after this session opened.
+    }
     $sessionText = Get-AbkConfigText -AppRoot $AppRoot -DataRoot $DataRoot -RcloneExe $RcloneExe -Path $SessionPath -Password $Password
     $cloudText = Get-AbkConfigText -AppRoot $AppRoot -DataRoot $DataRoot -RcloneExe $RcloneExe -Path $clouds -Password $Password
     if (-not $sessionText.Trim() -or -not $cloudText.Trim()) { return 0 }
@@ -590,6 +632,9 @@ function Save-AbkCloudChanges {
     Move-Item -LiteralPath $temp -Destination $clouds -Force
     if (Get-Command Protect-AbkSecret -ErrorAction SilentlyContinue) {
         [void](Protect-AbkSecret -Path $clouds)
+    }
+    if (Test-Path -LiteralPath $baseline) {
+        [IO.File]::WriteAllText($baseline, (Get-FileHash -LiteralPath $clouds -Algorithm SHA256).Hash, [Text.UTF8Encoding]::new($false))
     }
     return $changed
 }

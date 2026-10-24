@@ -79,7 +79,7 @@ what DATA describes, like robocopy /MIR:
   of REVERSE SSH TUN (an enabled channel comes back), the `Audion Backup Sync` task.
 - No rclone or cloudflared in the program — they are downloaded.
 
-Nothing is deleted silently: everything removed lands in `DATA\._runtime\mirror-<time>` with rights
+Nothing is deleted silently: everything removed lands in `DATA\Recovery\mirror-<time>` with rights
 for the owner, SYSTEM and administrators only; `restore.log` and `sshd.log` are there too. If
 the import of the keys failed, the former `~/.ssh` is put back in place.
 

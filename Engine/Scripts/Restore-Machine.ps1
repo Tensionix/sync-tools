@@ -78,7 +78,7 @@ try {
     if ($Check) {
         Invoke-RestoreStep 'Engine\Scripts\Import-AudionKeys.ps1' @('-Root', $data, '-Check', '-NoPause')
         if ($Mirror) {
-            Write-Host 'MIRROR: ~/.ssh is rebuilt from DATA as a whole; these leave C: for DATA\._runtime\mirror-<time>:'
+            Write-Host 'MIRROR: ~/.ssh is rebuilt from DATA as a whole; these leave C: for DATA\Recovery\mirror-<time>:'
             $profileSsh = (Join-Path $HOME '.ssh')
             if (Test-Path -LiteralPath $profileSsh) {
                 foreach ($file in @(Get-ChildItem -LiteralPath $profileSsh -Force -Recurse -File)) {

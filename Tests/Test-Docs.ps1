@@ -79,7 +79,7 @@ Test-Step -Title 'AGENTS.md объясняет, что он копия' -Ok ($he
 # вторую. Перевод тест не сверяет - только что половины есть, знают друг о друге и разделов
 # в них поровну (по заголовкам второго уровня).
 $pointer = Get-Content -LiteralPath (Join-Path $AppRoot 'README.md') -Raw
-foreach ($pair in 'README', 'RESTORE') {
+foreach ($pair in 'README', 'RESTORE', 'SYNC_ALL') {
     $ruName = '{0}_RU.md' -f $pair
     $enName = '{0}_EN.md' -f $pair
     $ruPath = Join-Path $AppRoot (Join-Path 'Docs' $ruName)

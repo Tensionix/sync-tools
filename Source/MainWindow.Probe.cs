@@ -222,14 +222,17 @@ public partial class MainWindow
 
         var server = targets.FirstOrDefault(t => t.Key == "server");
         var second = targets.FirstOrDefault(t => t.Key == "second");
-        var plan = new List<ProbeItem>
-        {
-            // MAIN VPS is the way home from other networks. The straight road to it is shorter
-            // than over cloudflared but lives until the address is blocked; the probe decides.
-            new("direct", server is { Host.Length: > 0 } ? server.Host : "direct.audion.dev", 22, "MAIN VPS 22"),
-            // The door cloudflared walks through: reached almost always, silent only where plain HTTPS is shut too.
-            new("cloud", "ssh.audion.dev", 443, "cloudflare 443"),
-        };
+        // Both names of MAIN VPS are the household's: targets.json, or the routes the tunnel client wrote into
+        // this machine's ~\.ssh\config. The code names none - the straight one leads to the outer address of the server.
+        var direct = server is { Host.Length: > 0 } ? server.Host : Ssh.HostNameOf("audion-vps-direct");
+        var door = server is { CloudflaredHost.Length: > 0 } ? server.CloudflaredHost : Ssh.HostNameOf("audion-vps");
+        var plan = new List<ProbeItem>();
+        // MAIN VPS is the way home from other networks. The straight road to it is shorter
+        // than over cloudflared but lives until the address is blocked; the probe decides.
+        if (direct.Length > 0) plan.Add(new("direct", direct, 22, "MAIN VPS 22"));
+        else SetDot("host:server", "idle", "адреса MAIN VPS нет в targets.json - SETUP → АДРЕСА");
+        // The door cloudflared walks through: reached almost always, silent only where plain HTTPS is shut too.
+        if (door.Length > 0) plan.Add(new("cloud", door, 443, "cloudflare 443"));
         if (second is { Host.Length: > 0 }) plan.Add(new("second", second.Host, second.SshPort, $"SECOND VPS {second.SshPort}"));
 
         var transports = Rclone.Transports();
@@ -292,7 +295,7 @@ public partial class MainWindow
             if (cloud.Access == "missing" && !_accessWarned)
             {
                 _accessWarned = true;
-                Journal.Add(Lang.F("Cloudflare Access: входа нет - дорога через cloudflared пропущена. Войти: RESTORE → MIRROR или Tunnel\\Bin\\cloudflared.exe access login https://{0}", "ssh.audion.dev"));
+                Journal.Add(Lang.F("Cloudflare Access: входа нет - дорога через cloudflared пропущена. Войти: RESTORE → MIRROR или Tunnel\\Bin\\cloudflared.exe access login https://{0}", plan.First(p => p.Key == "cloud").Address));
             }
             else if (cloud.Access == "ok") _accessWarned = false;
         }
@@ -385,7 +388,7 @@ public partial class MainWindow
             {
                 try
                 {
-                    var info = new ProcessStartInfo(cloudflared, "access token -app=https://ssh.audion.dev")
+                    var info = new ProcessStartInfo(cloudflared, "access token -app=https://" + items.First(i => i.Key == "cloud").Address)
                     {
                         UseShellExecute = false, CreateNoWindow = true,
                         RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true,

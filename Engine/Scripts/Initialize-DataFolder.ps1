@@ -9,7 +9,7 @@
 
     1. Working files a version before 1.15.0 left in the program folder move into the data
        folder (Restore-AbkMachineState). A copy that differs from what the data already holds
-       goes to ._runtime\migrated-<time>-<id> of the data: nothing is lost, and nothing foreign
+       goes to Recovery\migrated-<time>-<id> of the data: nothing is lost, and nothing foreign
        gets into the identity of a machine.
     2. The frame of the addresses: targets.json is laid out from the sample the program carries
        when the data folder has none (Restore-AbkTargetsFile). A file that is there is never
@@ -42,15 +42,18 @@
 param(
     [string]$Root,
     [string]$Previous = '',
-    [string]$SshConfig = ''
+    [string]$SshConfig = '',
+    [switch]$MigrateProgram
 )
 
 $ErrorActionPreference = 'Stop'
 $AppRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Import-Module (Join-Path $AppRoot 'Engine\BackupEngine.psm1') -Force -DisableNameChecking
+. (Join-Path $AppRoot 'Engine\StorageLayout.ps1')
 . (Join-Path $AppRoot 'Engine\DataRoot.ps1')
 . (Join-Path $AppRoot 'Engine\Targets.ps1')
 $data = Get-AbkDataRootPath -AppRoot $AppRoot -Root $Root
+[void](Move-AbkRuntimeStorage -AppRoot $AppRoot -DataRoot $data -IncludeProgram:$MigrateProgram)
 
 $moved = @()
 $quarantined = @()
@@ -72,7 +75,8 @@ if ($switched) {
     try { [void](Restore-AbkMachineState -AppRoot $AppRoot -DataRoot $Previous -Client (Split-Path -Leaf $Previous)) } catch { }
     $leftovers = @(Get-AbkMachinePairs -AppRoot $AppRoot -MachineRoot $data | Where-Object { Test-Path -LiteralPath $_.App })
     if ($leftovers.Count) {
-        $quarantine = Join-Path $data ('._runtime\migrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N'))
+        $quarantine = Join-Path $data ('Recovery\migrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N'))
+        Protect-AbkStorageRecovery $quarantine
         foreach ($pair in $leftovers) {
             try {
                 $to = Join-Path $quarantine $pair.Rel

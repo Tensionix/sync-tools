@@ -8,15 +8,14 @@
   <a href="https://github.com/Tensionix/sync-tools/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Tensionix/sync-tools?style=flat-square&color=5fd08a&logo=apache&logoColor=white&cacheSeconds=3600"></a>
 </p>
 
-**Version 2.5.0** · 2026-10-24 · 78.7 MB
+**Version 2.5.0** · 2026-10-24 · 149.1 MB
 
-- [Direct download](https://dl.audion.dev/sync-tools/2.5.0/Audion_Sync_Tools_v2.5.0.zip) — unmetered, no rate limits
+- [Direct download](https://audion.dev/get/sync-tools/2.5.0/Audion_Sync_Tools_v2.5.0_Full.zip) — unmetered, no rate limits
 - [Project page](https://audion.dev/downloads/sync-tools) — every version and how to install
-- [GitHub release](https://github.com/Tensionix/sync-tools/releases/tag/v2.5.0)
 
 <p align="center"><img src="Docs/screenshot.png" alt="The program window" width="560"></p>
 
-`SHA-256: f520a3172ca5739691736d5eb502fbd3da4a81e186c951c70e90aee096beb149`
+`SHA-256: 8f89aa0b91580270db958a6bd558a6924fbde8af822b9071edd6b8823b513e8a`
 
 ---
 
@@ -80,7 +79,7 @@ To confirm it all landed: the `DIAGNOSTICS` button in the TUNNEL section, or
 tunnel client. There is not a single file here that would be painful to lose:
 no keys, no addresses, no passwords — only a pointer to the profile.
 
-**The data** is the neighbouring `Audion Backup`: snapshots, six mirrors of
+**The data** is the neighbouring `Audion Backup`: snapshots, a library of
 MAIN VPS's code, keys, tokens. There is not a single executable file there.
 
 **The machine profile** is the data folder itself: every machine has its own,
@@ -229,8 +228,14 @@ never copied there, only paths and purposes.
 `rclone` and its own keys; a change that brings back a tie to the neighbours is
 a wrong change.
 
-**Do not clean the data.** `Audion Backup` is not deleted and not "put in
-order": the keys, the tokens and the only local copy of MAIN VPS are there.
+**MIR only inside the library.** SYNC ALL replaces managed mirrors, removing local
+edits and extra files there. Tunnel, connections, full Snapshots and explicitly
+protected secrets are not cleaned. Temporary old copies are removed after verification.
+
+**._runtime is disposable.** With the program closed and CLI operations finished,
+it can be deleted both here and in DATA. Cloud sessions and BISYNC belong only to
+DATA/config; recovery journals and backup settings belong to DATA/Recovery. Legacy
+files migrate with hash checks: [SYNC ALL](Docs/SYNC_ALL_EN.md#deleting-_runtime).
 
 **A button calls a wrapper.** Nothing must happen in the window that cannot be
 done from a console — otherwise the window and the wrappers drift apart.

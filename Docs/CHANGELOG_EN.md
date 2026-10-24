@@ -4,6 +4,9 @@
 
 **Contents**
 
+- [2.5.0 — 24 October 2026](#250--24-october-2026)
+- [2.4.1 — 23 October 2026](#241--23-october-2026)
+- [2.4.0 — 23 October 2026](#240--23-october-2026)
 - [2.3.1 — 20 October 2026](#231--20-october-2026)
 - [2.2.0 — 18 October 2026](#220--18-october-2026)
 - [2.0.1 — 15 October 2026](#201--15-october-2026)
@@ -59,6 +62,45 @@
 - [1.2.0 — 5 September 2026](#120--5-september-2026)
 - [1.1.0 — 5 September 2026](#110--5-september-2026)
 - [1.0.0 — 5 September 2026](#100--5-september-2026)
+
+## 2.5.0 — 24 October 2026
+
+**No data of the household in the program.** The SYNC ALL plan - MAIN VPS, the R2 bucket, the Forgejo folders on the
+server, the repositories, the parts of the recovery archive - lives only in `config\mirror.json` of the data folder;
+`config\mirror.sample.json` of the program is a template with a `<...>` in place of every value. SYNC ALL builds no plan
+from the program and does not finish an old version 1 plan: without a v2 plan, with a `<...>` left or without
+`protectedLocal` it stops changing nothing and says what to do.
+
+**The names of MAIN VPS in targets.json.** The name for the straight road (`host`) and the new name for cloudflared
+(`cloudflaredHost`) live in the `server` entry; the second is filled in by the field `MAIN VPS: NAME FOR CLOUDFLARED` of
+SETUP → ADDRESSES. Until the field is there, the probe of the window, the tunnel client and the route check take the
+names from this machine's `~\.ssh\config`; without a name a route is not written, and the program says what is missing.
+
+**SYNC ALL checks what it runs on.** Python 3.10+ is looked for as `py -3`, then `python.exe` on PATH (the Microsoft
+Store stub does not count), and its version is checked; without Git or a fitting Python SYNC ALL says at once what to
+install. The question before SYNC ALL is "Refresh the library?".
+
+## 2.4.1 — 23 October 2026
+
+._runtime is disposable in both the program and DATA. SYNC ALL journals and rollback
+move to DATA/Recovery/sync-all, backup settings to DATA/Recovery, cloud sessions to
+DATA/config/rclone. Legacy files migrate with hash verification without overwriting
+conflicting copies. BISYNC requires DATA and never stores state in the public project.
+Refreshed cloud tokens survive restart; stale sessions cannot undo a newer reconnect.
+Tests cover deleting both scratch folders, reopening the window, preserving BISYNC
+and recovering an interrupted SYNC ALL.
+
+## 2.4.0 — 23 October 2026
+
+SYNC ALL refreshes the complete library, discovers new repositories automatically,
+and retains every server recovery payload. Checks cover refs/HEAD, Git fsck,
+SHA-256, the inner manifest, and actual operational file/unit coverage.
+Validated staging copies are installed transactionally in MIR mode. Server versions
+replace local edits and extra files. Previous copies exist only for temporary rollback
+and are removed after success. Keys, connections, recovery snapshots and explicitly
+protected secrets are not removed. Concurrent local changes stop replacement.
+CLI and button share one engine; v1 plans migrate safely. Details:
+[SYNC ALL](SYNC_ALL_EN.md).
 
 ## 2.3.1 — 20 October 2026
 

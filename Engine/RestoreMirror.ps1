@@ -1,6 +1,6 @@
 ﻿# RESTORE MIRROR: after a Windows reinstall C: keeps exactly what the selected
 # DATA describes. Whatever the profile, Startup or old versions left behind is
-# moved into DATA\._runtime\mirror-<time>: off the system disk, restorable by
+# moved into DATA\Recovery\mirror-<time>: off the system disk, restorable by
 # hand, never silently deleted. Human steps (UAC, Access login, router
 # passwords) wait as long as the person needs; there are no timeouts on them.
 
@@ -16,7 +16,7 @@ function Protect-AbkMirrorFolder {
 
 function New-AbkMirrorBackup {
     param([Parameter(Mandatory)][string]$DataRoot)
-    $path = Join-Path $DataRoot ('._runtime\mirror-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    $path = Join-Path $DataRoot ('Recovery\mirror-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
     New-Item -ItemType Directory -Path $path -Force | Out-Null
     Protect-AbkMirrorFolder -Path $path
     return $path

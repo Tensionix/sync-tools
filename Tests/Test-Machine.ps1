@@ -173,11 +173,11 @@ try {
     New-File (Join-Path $app 'config\rclone\known_hosts') 'чужое'
     $kept = @(Restore-AbkMachineState -AppRoot $app -DataRoot $mine)
     $stillMine = Get-Content -LiteralPath (Join-Path $mine 'config\rclone\known_hosts') -Raw
-    $quarantined = @(Get-ChildItem -LiteralPath (Join-Path $mine '._runtime') -Directory -Filter 'migrated-*' -ErrorAction SilentlyContinue)
+    $quarantined = @(Get-ChildItem -LiteralPath (Join-Path $mine 'Recovery') -Directory -Filter 'migrated-*' -ErrorAction SilentlyContinue)
     Test-Step -Title 'отличное от данных уходит в карантин' `
         -Ok (($kept.Count -eq 1) -and ($kept[0].Mode -eq 'quarantined') -and ($stillMine -match 'из программы') -and
              ($quarantined.Count -ge 1) -and -not (Test-Path -LiteralPath (Join-Path $app 'config\rclone\known_hosts'))) `
-        -Note '._runtime\migrated-<время>, в данных своё'
+        -Note 'Recovery\migrated-<время>, в данных своё'
 
     # --- совпадающая копия просто снимается ------------------------------------------
     Copy-Item -LiteralPath (Join-Path $mine 'config\rclone\known_hosts') -Destination (Join-Path $app 'config\rclone\known_hosts') -Force

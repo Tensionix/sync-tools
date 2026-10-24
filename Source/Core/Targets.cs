@@ -20,6 +20,8 @@ public sealed class Target
     public string User { get; init; } = "";
     /// <summary>A host of ~\.ssh\config the target is reached by: MAIN VPS has no home address at all.</summary>
     public string SshHost { get; init; } = "";
+    /// <summary>The name cloudflared goes to MAIN VPS by - an address of the household, so it lives here and not in the code.</summary>
+    public string CloudflaredHost { get; init; } = "";
     public int SshPort { get; init; } = 22;
     /// <summary>False - the target lets in by password only: no key is offered to it (a router).</summary>
     public bool KeyAuth { get; init; } = true;
@@ -64,6 +66,7 @@ public static class Targets
                     Hint = Text("hint"),
                     User = Text("user"),
                     SshHost = Text("sshHost"),
+                    CloudflaredHost = Text("cloudflaredHost"),
                     SshPort = v.TryGetProperty("sshPort", out var port) && port.TryGetInt32(out var n) ? n : 22,
                     KeyAuth = !v.TryGetProperty("keyAuth", out var key) || key.ValueKind != JsonValueKind.False,
                 });

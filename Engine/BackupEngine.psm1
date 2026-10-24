@@ -17,6 +17,7 @@
 # свои, а в коде только имена по умолчанию.
 . (Join-Path $PSScriptRoot 'DataRoot.ps1')
 . (Join-Path $PSScriptRoot 'Targets.ps1')
+. (Join-Path $PSScriptRoot 'StorageLayout.ps1')
 
 # Пары ключей без пароля - одним способом для всех сценариев.
 . (Join-Path $PSScriptRoot 'KeyPair.ps1')
@@ -813,7 +814,7 @@ function Restore-AbkMachineState {
         Нет в данных и прежний указатель подтверждает папку - переносится.
         Есть и совпадает - копия из программы
         просто снимается. Есть и отличается - в данных своё, а копия из
-        программы уходит в карантин ._runtime\migrated-<время>-<id> в данных: ничего не
+        программы уходит в карантин Recovery\migrated-<время>-<id> в данных: ничего не
         теряется, но и чужое в личность машины не попадает. Возвращает
         перенесённые и отправленные в карантин пары (Mode: moved|quarantined).
     #>
@@ -847,7 +848,8 @@ function Restore-AbkMachineState {
                 Remove-Item -LiteralPath $pair.App -Force
             } else {
                 if (-not $quarantine) {
-                    $quarantine = Join-Path $MachineRoot ('._runtime\migrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N'))
+                    $quarantine = Join-Path $MachineRoot ('Recovery\migrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N'))
+                    Protect-AbkStorageRecovery $quarantine
                 }
                 $to = Join-Path $quarantine $pair.Rel
                 $dir = Split-Path -Parent $to

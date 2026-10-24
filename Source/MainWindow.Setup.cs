@@ -101,8 +101,12 @@ public partial class MainWindow
         }
         if (rows.Count == 0) return;
 
-        // The names of SECOND VPS - fields under the table: a row has room for the address, the account and the port only.
+        // The names of the servers - fields under the table: a row has room for the address, the account and the port only.
         var fields = new List<FormField>();
+        // The name cloudflared goes to MAIN VPS by: the household's, written here and nowhere in the program. A machine set up
+        // before the field has it in its ~\.ssh\config only - the field starts from there.
+        if (targets.TryGetProperty("server", out var main) && main.ValueKind == JsonValueKind.Object)
+            fields.Add(new FormField("mainCloudflared", MainCfLabel, Text(main, "cloudflaredHost") is { Length: > 0 } door ? door : Core.Ssh.HostNameOf("audion-vps")));
         if (targets.TryGetProperty("second", out var second) && second.ValueKind == JsonValueKind.Object)
         {
             string Or(string name, string fallback) => Text(second, name) is { Length: > 0 } said ? said : fallback;
@@ -122,11 +126,13 @@ public partial class MainWindow
             ["user"] = answer.Table[row.Key]["user"],
             ["port"] = answer.Table[row.Key]["port"],
         }) };
-        if (fields.Count > 0)
+        if (answer.Fields.ContainsKey("secondSshHost"))
             said["second"] = new Dictionary<string, string>
             {
                 ["sshHost"] = answer.Fields["secondSshHost"], ["sshHostCf"] = answer.Fields["secondSshHostCf"], ["key"] = answer.Fields["secondKey"],
             };
+        if (answer.Fields.TryGetValue("mainCloudflared", out var cloudflared))
+            said["server"] = new Dictionary<string, string> { ["cloudflaredHost"] = cloudflared };
         var answers = Path.Combine(Paths.State, $"setup-answers-{Guid.NewGuid():N}.json");
         File.WriteAllText(answers, JsonSerializer.Serialize(said));
         RunSetup("АДРЕСА МАШИН", "Set-Targets.ps1", new[] { "-AnswerFile", answers }, onSuccess: () =>

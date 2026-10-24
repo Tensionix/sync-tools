@@ -1263,6 +1263,39 @@ static class Stand
                 new { fresh = fresh.Backdrop, panels = fresh.BackdropPanelsOnly, saved = saved.Backdrop, savedPanels = saved.BackdropPanelsOnly });
         }
 
+        // Both scratch folders may be removed after closing the program. User data must survive.
+        {
+            Home();
+            var root = DataRoot.Path_;
+            var first = InStand("durable-first");
+            var second = InStand("durable-second");
+            var state = DataStore.PairState(first, second);
+            File.WriteAllText(Path.Combine(state, "fixture.path1.lst"), "first listing");
+            File.WriteAllText(Path.Combine(state, "fixture.path2.lst"), "second listing");
+            DataStore.RememberPair(first, second);
+            var pairs = File.ReadAllText(DataStore.BisyncPairsFile);
+            var session = Path.Combine(root, "config", "rclone", "session.conf");
+            Directory.CreateDirectory(Path.GetDirectoryName(session)!);
+            File.WriteAllText(session, "encrypted-session-fixture");
+            foreach (var folder in new[] { Path.Combine(Paths.Root, "._runtime"), Path.Combine(root, "._runtime") })
+            {
+                if (!Path.GetFullPath(folder).Contains("abk-stand-")) throw new InvalidOperationException("Unsafe stand cleanup");
+                Directory.CreateDirectory(folder);
+                File.WriteAllText(Path.Combine(folder, "disposable.txt"), "cache");
+                Directory.Delete(folder, recursive: true);
+            }
+            DataRoot.Refresh();
+            var window = Window();
+            bool preserved = DataStore.PairKnown(first, second) && File.ReadAllText(DataStore.BisyncPairsFile) == pairs
+                && File.ReadAllText(session) == "encrypted-session-fixture"
+                && DataStore.PairState(first, second) == state;
+            Verdict("удаление обоих ._runtime и новое окно сохраняют BISYNC и облачный конфиг в DATA", preserved, new { preserved });
+            Close(window);
+            DataRoot.Name(InStand("missing-data-folder"));
+            bool refused = false;
+            try { DataStore.PairState(first, second); } catch (InvalidOperationException) { refused = true; }
+            Verdict("без DATA состояние BISYNC не создаётся в публичной папке программы", refused, new { refused });
+        }
         Home();
         Rclone.StopAll();
         Pump(150);
