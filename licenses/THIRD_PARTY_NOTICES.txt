@@ -269,7 +269,7 @@ BUNDLED COMPONENTS
    Legal documents: L-6b39d18b4151
 
 38. Microsoft.NETCore.App.Runtime.win-x64
-   Version: 10.0.13
+   Version: 10.0.14
    License: MIT
    Source type: dotnet-package
    Provider: Microsoft
@@ -7538,7 +7538,7 @@ You are solely responsible for determining the appropriateness of using and dist
 [L-cfc21f5e8bd6] LICENSE.TXT
 SHA256: cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310
 Components: Microsoft.NETCore.App.Runtime.win-x64, runtime.native.System.Data.SqlClient.sni, System.Drawing.Common, System.ServiceModel.Http, System.ServiceModel.NetFramingBase, System.ServiceModel.NetTcp, System.ServiceModel.Primitives, System.Web.Services.Description
-Captured from: nuget/Microsoft.NETCore.App.Runtime.win-x64/10.0.13/LICENSE.TXT
+Captured from: nuget/Microsoft.NETCore.App.Runtime.win-x64/10.0.14/LICENSE.TXT
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 

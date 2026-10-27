@@ -1,7 +1,7 @@
 # Audion Build Licenses Scan Report
 
 - Project: **Audion Sync Tools** (`audion-sync-tools`)
-- Run: `20261024T034203Z_audion-sync-tools_948be434`
+- Run: `20261027T123541Z_audion-sync-tools_6c5ce56a`
 - Scan root (from the project root): `.`
 - Output (from the project root): `licenses`
 - Status: **PASS**
@@ -54,7 +54,7 @@ No issues detected.
 | Microsoft.Management.Infrastructure | `UNCHANGED` | 3.0.0 | 3.0.0 |
 | Microsoft.Management.Infrastructure.CimCmdlets | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.Management.Infrastructure.Runtime.Win | `UNCHANGED` | 3.0.0 | 3.0.0 |
-| Microsoft.NETCore.App.Runtime.win-x64 | `UNCHANGED` | 10.0.13 | 10.0.13 |
+| Microsoft.NETCore.App.Runtime.win-x64 | `VERSION_OR_ARTIFACT_CHANGED_LICENSE_SAME` | 10.0.13 | 10.0.14 |
 | Microsoft.PowerShell.Commands.Diagnostics | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.PowerShell.Commands.Management | `UNCHANGED` | 7.6.6 | 7.6.6 |
 | Microsoft.PowerShell.Commands.Utility | `UNCHANGED` | 7.6.6 | 7.6.6 |

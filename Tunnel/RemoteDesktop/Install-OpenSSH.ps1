@@ -107,7 +107,7 @@ Say "служба sshd: $((Get-Service sshd).Status), автозапуск" Gree
 if ($Root) { $null = Save-AbkSshHostIdentity -DataRoot $Root }
 
 $RuleName = 'Audion Remote Files (SSH 22)'
-$Trusted = @('192.168.10.0/24','192.168.2.0/24','192.168.5.0/24','10.11.0.0/24','10.10.0.0/24','172.16.6.0/24')
+$Trusted = @('192.168.10.0/24','192.168.2.0/24','192.168.5.0/24','10.11.0.0/24','10.10.0.0/24','10.12.0.0/24','192.168.15.0/24','172.16.6.0/24')
 Get-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -ErrorAction SilentlyContinue | Disable-NetFirewallRule -ErrorAction SilentlyContinue
 if (Get-NetFirewallRule -DisplayName $RuleName -ErrorAction SilentlyContinue) { Remove-NetFirewallRule -DisplayName $RuleName }
 $scope = if ($Anywhere) { 'Any' } else { $Trusted }

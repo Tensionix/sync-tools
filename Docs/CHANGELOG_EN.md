@@ -4,6 +4,7 @@
 
 **Contents**
 
+- [2.5.1 — 27 October 2026](#251--27-october-2026)
 - [2.5.0 — 24 October 2026](#250--24-october-2026)
 - [2.4.1 — 23 October 2026](#241--23-october-2026)
 - [2.4.0 — 23 October 2026](#240--23-october-2026)
@@ -62,6 +63,20 @@
 - [1.2.0 — 5 September 2026](#120--5-september-2026)
 - [1.1.0 — 5 September 2026](#110--5-september-2026)
 - [1.0.0 — 5 September 2026](#100--5-september-2026)
+
+## 2.5.1 — 27 October 2026
+
+**A connection without an update of the tools.** The probe of the window is tried again while both VPS are silent, even
+when a machine or a router of this network has already answered: such an answer no longer cancels the retry, and the
+roads to MAIN VPS and SECOND VPS do not stay "none" until a probe by hand or TOOLS UPDATE. A probe asked while the
+previous one ran (the network settled after a change, SETUP, an update) goes after it instead of being lost.
+
+**SSHD lets in the network of the router at work.** `10.12.0.0/24` (WG SECOND VPS ↔ the router at work) and
+`192.168.15.0/24` (the network behind it) are added to the own networks of the rule for port 22: a machine behind that
+router is reached through SECOND VPS. SSHD updates the rule.
+
+**REVERSE SSH TUN takes the ssh of Windows.** When the ssh of Git (`usr\bin`, as in Git Bash) comes first in PATH, the
+channel passes it by: it cannot read the config of the channel and exited with an error before any connection.
 
 ## 2.5.0 — 24 October 2026
 

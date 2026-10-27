@@ -1296,6 +1296,53 @@ static class Stand
             try { DataStore.PairState(first, second); } catch (InvalidOperationException) { refused = true; }
             Verdict("без DATA состояние BISYNC не создаётся в публичной папке программы", refused, new { refused });
         }
+
+        // ------------------------------------------------------------ the probe and the way out
+        // 27.10.2026: at the start the router of the network answered and both VPS did not yet - no second probe came,
+        // and the roads to them stayed "нет" until an update of the tools asked for one. A probe that reached neither
+        // VPS is tried again whoever else answered; a probe asked while one runs goes after it.
+        {
+            Home();
+            var root = InStand("Audion Backup P");
+            Directory.CreateDirectory(Path.Combine(root, "Tunnel", "RemoteDesktop", "config"));
+            Directory.CreateDirectory(Path.Combine(root, "config", "rclone"));
+            File.WriteAllText(Path.Combine(root, "config", "rclone", "rclone.conf"), "");
+            var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listener.Start();
+            int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port, knocks = 0;
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                try { while (true) { using var client = await listener.AcceptTcpClientAsync(); System.Threading.Interlocked.Increment(ref knocks); } }
+                catch { }
+            });
+            // The network for documentation (192.0.2.0/24) never answers: both VPS are silent, the router answers.
+            File.WriteAllText(Path.Combine(root, "Tunnel", "RemoteDesktop", "config", "targets.json"),
+                "{ \"server\": { \"host\": \"192.0.2.1\" }, \"second\": { \"host\": \"192.0.2.2\", \"sshPort\": 22 }, " +
+                $"\"router-work\": {{ \"lan\": \"127.0.0.1\", \"sshPort\": {port} }} }}");
+            DataRoot.Choose(root);
+            Sources.Rebuild();
+            var window = Window();
+            var again = (DispatcherTimer)Field(window, "_probeAgain")!;
+            bool Probing() => (bool)Field(window, "_probing")!;
+            window.GetType().GetField("_probing", Private)!.SetValue(window, false);
+            Call(window, "StartProbe", true);
+            Call(window, "StartProbe", true);
+            bool asked = (bool)Field(window, "_probeAsked")!;
+            bool both = Until(() => !Probing() && System.Threading.Volatile.Read(ref knocks) >= 2, 20000);
+            Pump(300);
+            bool retry = again.IsEnabled;
+            int knocked = System.Threading.Volatile.Read(ref knocks);
+            again.Stop();
+            Verdict("проба: оба VPS молчат, а роутер своей сети отвечает - повтор назначен; проба, попрошенная во время пробы, идёт следом",
+                asked && both && retry && knocked == 2, new { asked, both, retry, knocked });
+            Until(() => !Probing(), 10000);
+            window.GetType().GetField("_probing", Private)!.SetValue(window, true);
+            Close(window);
+            listener.Stop();
+            Home();
+            Directory.Delete(root, true);
+        }
+
         Home();
         Rclone.StopAll();
         Pump(150);

@@ -1,6 +1,6 @@
 {
   "schema": "audion.build_licenses.components.v1",
-  "generated_utc": "2026-10-24T03:42:05Z",
+  "generated_utc": "2026-10-27T12:35:44Z",
   "project_id": "audion-sync-tools",
   "project_name": "Audion Sync Tools",
   "scan_root": ".",
@@ -1545,7 +1545,7 @@
       "id": "nuget-microsoft.netcore.app.runtime.win-x64",
       "name": "Microsoft.NETCore.App.Runtime.win-x64",
       "normalized_name": "microsoft-netcore-app-runtime-win-x64",
-      "version": "10.0.13",
+      "version": "10.0.14",
       "license_summary": "MIT",
       "license_expression": "MIT",
       "linkage": "dynamic_library",
@@ -1560,20 +1560,20 @@
       "source_reference": {
         "type": "upstream_pin",
         "url": "https://github.com/dotnet/dotnet",
-        "version": "10.0.13",
-        "commit": "4099f83977f4d29604a9aeb971fb0a7bc1d5f699"
+        "version": "10.0.14",
+        "commit": "0427b9abbead3fa64c6655eb4290c537397131fa"
       },
       "legal_documents": [
         {
           "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
           "display_name": "LICENSE.TXT",
-          "source_path": "nuget/Microsoft.NETCore.App.Runtime.win-x64/10.0.13/LICENSE.TXT",
+          "source_path": "nuget/Microsoft.NETCore.App.Runtime.win-x64/10.0.14/LICENSE.TXT",
           "raw_size": 1139
         },
         {
           "sha256": "c6926930d0181fa515076603e1305461b1bce5275a8b35337d75d2eef3acad4a",
           "display_name": "THIRD-PARTY-NOTICES.TXT",
-          "source_path": "nuget/Microsoft.NETCore.App.Runtime.win-x64/10.0.13/THIRD-PARTY-NOTICES.TXT",
+          "source_path": "nuget/Microsoft.NETCore.App.Runtime.win-x64/10.0.14/THIRD-PARTY-NOTICES.TXT",
           "raw_size": 78041
         }
       ],
@@ -1584,7 +1584,7 @@
         ],
         "runtime_pack": true,
         "copyright": "© Microsoft Corporation. All rights reserved.",
-        "nuget": "https://www.nuget.org/packages/Microsoft.NETCore.App.Runtime.win-x64/10.0.13"
+        "nuget": "https://www.nuget.org/packages/Microsoft.NETCore.App.Runtime.win-x64/10.0.14"
       },
       "license_fingerprint": "cedbe796343121b119bc022839827dadce16619abe9ae08ad9b3d65b240af93c"
     },

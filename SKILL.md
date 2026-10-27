@@ -367,7 +367,9 @@ GUI and CLI use the same host selection. GUI runtime and SSH routes are unchange
 processes, a local OpenSSH version query and the actual -Hold entry point with
 full tunnel arguments and a synthetic local ProxyCommand. The latter verifies
 live diagnostics and SSH/proxy cleanup without real profiles or network access;
-it does not test authentication or successful remote forwarding.
+it does not test authentication or successful remote forwarding. A dummy
+`usr\bin\ssh.exe` put first in PATH checks that the worker takes the ssh of Windows,
+not an MSYS build (the ssh of Git in Git Bash cannot read the BOM of the config).
 Each worker also receives a unique `*.trace.log`: synchronous checkpoints
 record its PowerShell/CLR version, resolved SSH binary, child PID, and the last
 completed startup/read step. They contain no SSH argument list or key contents.
@@ -737,7 +739,9 @@ the audit of those fixes found: a name taken while F2 waited in the queue with a
 stayed in place and the temporary name said, this very machine by a far road (asked by its mark,
 silent, another machine, remembered, paths that do not meet), the warning of rclone hidden in one
 job, the name an object is left under after СТОП, СТОП while a job asks before its start, a panel
-that left a folder of this disk. The stub reads a folder of the stand for real when asked for a
+that left a folder of this disk; and one for the probe of the network: both VPS silent (in 192.0.2.0/24)
+while a router of the network answers (a listener on the loopback) - the probe is tried again, and a
+probe asked while one runs goes after it. The stub reads a folder of the stand for real when asked for a
 listing, answers `lsjson-answer.json` for any other place, fails by `lsjson-fail`, `moveto-fail`
 and `moveto-fail-second` (the second step of a rename alone), really renames on a disk by
 `moveto-real`, answers the reading of the mark by `cat-self` (this machine) and `cat-silent` (no

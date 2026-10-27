@@ -28,9 +28,9 @@ public partial class MainWindow
     bool _probing, _probeAsked;
     bool _accessWarned;
 
-    // A probe nobody answered is tried again a little later, three times at most in a row: the program may start before
-    // the network is up (with Windows, or while a VPN connects) - the owner, 20.10.2026, saw `нет` at every road 37 s
-    // after his VPN came up, and the line stayed so. A change of the network asks for a probe once it settles: a VPN
+    // A probe that reached neither VPS is tried again a little later, three times at most in a row: the program may start
+    // before the network is up (with Windows, or while a VPN connects) - the owner, 20.10.2026, saw `нет` at every road
+    // 37 s after his VPN came up, and the line stayed so. A change of the network asks for a probe once it settles: a VPN
     // raises and drops its adapter several times while it connects.
     readonly DispatcherTimer _probeAgain = new() { Interval = TimeSpan.FromSeconds(20) };
     readonly DispatcherTimer _networkSettled = new() { Interval = TimeSpan.FromSeconds(8) };
@@ -315,13 +315,20 @@ public partial class MainWindow
         Sources.RouteFail.Clear();
         _probeStamp = DateTime.Now.ToString("HH:mm");
         _probing = false;
-        // Nobody answered at all - not even MAIN VPS or the door of cloudflared: the network is not up yet, as a rule.
-        if (results.Count > 0 && results.All(r => !r.Ok)) { if (++_silentProbes <= 3) _probeAgain.Start(); }
+        // Neither MAIN VPS, nor the door of cloudflared, nor SECOND VPS answered: the way out of this network is not up
+        // yet, as a rule. A machine or a router of this very network may answer all the same, and it is no sign of the
+        // way out: on 27.10.2026 the router at work answered at the start, and the roads to both VPS stayed "нет" until
+        // an update of the tools happened to ask for a probe.
+        var roads = results.Where(r => r.Key is "direct" or "cloud" or "second").ToList();
+        if (roads.Count > 0 && roads.All(r => !r.Ok)) { if (++_silentProbes <= 3) _probeAgain.Start(); }
         else _silentProbes = 0;
         if (_barButtons.TryGetValue("ProbeButton", out var again)) again.IsEnabled = true;
         // The probe decides the road and ends later than the first reading of the panels: they
         // are read again, or they go on knocking at an address that is silent in this network.
         AfterRouteChange();
+        // A probe asked while this one ran - the network settled after a change, the tools were updated - goes now:
+        // dropped, it left the answers of the network as it was before.
+        if (_probeAsked) { _probeAgain.Stop(); StartProbe(quiet: true); }
     }
 
     static List<ProbeResult> Probe(List<ProbeItem> items, int timeoutMs, string cloudflared)

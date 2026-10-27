@@ -187,8 +187,24 @@ Start-Sleep -Seconds 90
         ) -join "`r`n")
         $saved.Name=$name; Put $file ($saved | ConvertTo-Json)
         $control.After=[datetime]::MinValue
-        Update-AbkBeaconRuntime -Control $control -AppRoot $app -DataRoot $data -Say $say
+        # The ssh of Git (usr\bin, an MSYS build) comes first in PATH of a Git Bash shell and stops at the BOM of this
+        # config before its ProxyCommand. A dummy in a usr\bin of the lab stands for it, whatever shell runs the test.
+        $fakeBin=Join-Path $lab 'usr\bin'
+        New-Item -ItemType Directory -Path $fakeBin -Force | Out-Null
+        Put (Join-Path $fakeBin 'ssh.exe') 'not an ssh'
+        $beforePath=$env:PATH
+        $env:PATH=$fakeBin + ';' + $env:PATH
+        try { Update-AbkBeaconRuntime -Control $control -AppRoot $app -DataRoot $data -Say $say }
+        finally { $env:PATH=$beforePath }
         if(-not $control.Handle){throw 'No production -Hold fixture'}
+        $until=(Get-Date).AddSeconds(10)
+        do {
+            $productionTrace=Read-AbkBeaconSshLog -Path $control.Handle.TraceLog
+            if($productionTrace.Contains('worker.ssh.resolved')){break}
+            Start-Sleep -Milliseconds 50
+        } while((Get-Date) -lt $until)
+        $resolvedSsh=[regex]::Match($productionTrace,'worker\.ssh\.resolved ([^\r\n]+)').Groups[1].Value.Trim()
+        Check 'production worker passes by an MSYS ssh first in PATH' ($resolvedSsh.Length -gt 0 -and -not $resolvedSsh.StartsWith($fakeBin,[StringComparison]::OrdinalIgnoreCase))
         Wait-File $proxyPidFile
         $proxyId=[int][IO.File]::ReadAllText($proxyPidFile)
         $productionTrace=Read-AbkBeaconSshLog -Path $control.Handle.TraceLog

@@ -242,8 +242,12 @@ function Start-Holder {
 }
 
 function Find-Ssh {
-    $c = Get-Command ssh -ErrorAction SilentlyContinue
-    if ($c) { return $c.Source }
+    # Только ssh из Windows: конфиг, ProxyCommand и NUL канала написаны под него. В PATH оболочки Git Bash первым
+    # стоит ssh из Git (usr\bin, сборка MSYS) - он принимает BOM конфига за опцию и выходит с 255, не дойдя до
+    # ProxyCommand (27.10.2026: Test-BeaconLifecycle, запущенный из такой оболочки). Такие сборки пропускаются.
+    foreach ($c in @(Get-Command ssh -All -CommandType Application -ErrorAction SilentlyContinue)) {
+        if ($c.Source -notmatch '\\usr\\bin\\|\\cygwin') { return $c.Source }
+    }
     $p = Join-Path $env:SystemRoot 'System32\OpenSSH\ssh.exe'
     if (Test-Path $p) { return $p }
     return $null
