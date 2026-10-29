@@ -18,7 +18,7 @@ try {
     foreach ($dir in @((Join-Path $app 'Engine'),(Join-Path $app 'Tunnel\RemoteDesktop'),(Join-Path $data 'Tunnel\SSH\beacon'),(Join-Path $data 'Tunnel\RemoteDesktop\config'),$startup)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
-    foreach ($file in 'BeaconLifecycle.ps1','DataRoot.ps1','Secrets.ps1','Targets.ps1','KeyPair.ps1') {
+    foreach ($file in 'BeaconLifecycle.ps1','DataRoot.ps1','Secrets.ps1','Targets.ps1','KeyPair.ps1','RestoreMirror.ps1') {
         Copy-Item -LiteralPath (Join-Path $AppRoot ('Engine\' + $file)) -Destination (Join-Path $app 'Engine')
     }
     # Only the OS startup-folder resolver is redirected to this fixture.

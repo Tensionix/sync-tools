@@ -114,6 +114,7 @@ $TunnelRoot = Split-Path $Here -Parent
 . (Join-Path (Split-Path -Parent $TunnelRoot) 'Engine\Targets.ps1')
 . (Join-Path (Split-Path -Parent $TunnelRoot) 'Engine\KeyPair.ps1')
 . (Join-Path (Split-Path -Parent $TunnelRoot) 'Engine\BeaconLifecycle.ps1')
+. (Join-Path (Split-Path -Parent $TunnelRoot) 'Engine\RestoreMirror.ps1')
 
 # `second-vps` во врапперах - условное имя SECOND VPS: настоящее у
 # каждого своё и лежит в targets.json.
@@ -511,6 +512,21 @@ if ($Hold) {
         $state = $enabled.State
         $leg = $legs[$n % $legs.Count]
         $n++
+
+        # Плечо через cloudflared без входа в Cloudflare Access не трогаем: держатель
+        # живёт без окна, а cloudflared на каждой попытке открывал бы браузер со
+        # входом - после RESTORE их набегали десятки. Вход - RESTORE MIRROR или
+        # cloudflared access login; до него канал держат остальные плечи.
+        $door = $null
+        if ($state.SshConfig) { $door = Get-AbkAccessLeg -SshConfig $state.SshConfig -Alias $leg }
+        if ($door -and -not ((Test-Path -LiteralPath $door.Cloudflared) -and
+                (Test-AbkAccessToken -Cloudflared $door.Cloudflared -HostName $door.HostName))) {
+            Write-Beacon ('хост {0}: нет входа в Cloudflare Access - плечо пропущено' -f $leg)
+            Write-AbkBeaconTrace -Path $RuntimeLog -Stage 'worker.leg.skipped' -Detail 'no-access-sign-in'
+            Start-Sleep 15
+            continue
+        }
+
         Write-Beacon ('SSH: подключение к {0}, порт туннеля {1}' -f $leg, $state.Port)
         Write-AbkBeaconTrace -Path $RuntimeLog -Stage 'worker.attempt.begin' -Detail ('attempt=' + $n)
         [IO.File]::WriteAllText($sshLog, '')

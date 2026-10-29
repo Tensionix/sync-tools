@@ -77,14 +77,25 @@ $TunnelRoot = Split-Path $Here -Parent
 function Write-Line { param($Text, $Color = 'Gray') Write-Host "  $Text" -ForegroundColor $Color }
 
 function Get-FreeLocalPort {
-    <# Свободный порт у себя: занятые узнаём у самой системы. #>
-    $busy = @()
-    try {
-        $busy = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
-            ForEach-Object { [int]$_.LocalPort })
-    } catch { }
-    for ($p = 24000; $p -lt 24100; $p++) { if ($busy -notcontains $p) { return $p } }
+    <#
+        Свободный порт у себя: занимаем его на миг сами, на том же адресе, что
+        займёт ssh -L. Таблице соединений Windows не верим: в 26H2 (сборка 26300)
+        она отдаёт состояния вразнобой, и занятый порт мог сойти за свободный.
+    #>
+    for ($p = 24000; $p -lt 24100; $p++) {
+        $probe = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, $p)
+        try { $probe.Start(); return $p } catch { } finally { $probe.Stop() }
+    }
     return 0
+}
+
+function Test-LocalPortAnswers {
+    <# Отвечает ли порт у нас: стук в него, а не таблица соединений (см. выше). #>
+    param([int]$Port)
+    $client = New-Object System.Net.Sockets.TcpClient
+    try { return ($client.ConnectAsync('127.0.0.1', $Port).Wait(1000) -and $client.Connected) }
+    catch { return $false }
+    finally { $client.Close() }
 }
 
 # --- Что именно несём --------------------------------------------------------
@@ -147,8 +158,7 @@ $up = $false
 for ($try = 0; $try -lt 12; $try++) {
     Start-Sleep 1
     if ($proc.HasExited) { break }
-    $listening = @(Get-NetTCPConnection -State Listen -LocalPort $LocalPort -ErrorAction SilentlyContinue)
-    if ($listening.Count) { $up = $true; break }
+    if (Test-LocalPortAnswers $LocalPort) { $up = $true; break }
 }
 
 if (-not $up) {

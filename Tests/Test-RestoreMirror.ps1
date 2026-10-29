@@ -50,6 +50,10 @@ try {
         "Host *`r`n    ProxyCommand cloudflared access ssh --hostname %h`r`n")
     $hosts = @(Get-AbkAccessHosts -SshConfig $config)
     Assert ($hosts.Count -eq 1 -and $hosts[0] -eq 'ssh.example.invalid') 'Access sign-in is asked only for cloudflared routes'
+    $door = Get-AbkAccessLeg -SshConfig $config -Alias 'viacf'
+    Assert ($door -and $door.HostName -eq 'ssh.example.invalid' -and $door.Cloudflared -eq 'C:/x/cloudflared.exe') 'REVERSE SSH TUN finds the Access door of a cloudflared leg'
+    Assert ($null -eq (Get-AbkAccessLeg -SshConfig $config -Alias 'direct') -and $null -eq (Get-AbkAccessLeg -SshConfig $config -Alias 'jump') -and
+        $null -eq (Get-AbkAccessLeg -SshConfig $config -Alias 'unknown')) 'direct, jump and unknown legs have no Access door'
 
     $fake = Join-Path $lab 'fake-cloudflared.cmd'
     Put $fake "@exit /b 1`r`n"

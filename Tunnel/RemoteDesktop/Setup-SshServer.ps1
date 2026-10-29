@@ -195,6 +195,37 @@ function Merge-AccessKeys {
     }
 }
 
+function Test-SshdAnswers {
+    <#
+        Отвечает ли sshd этой машины: стук в порт 22 у себя и приветствие SSH в
+        ответ. Таблица соединений Windows для этого не годится: в 26H2 (сборка
+        26300) она отдаёт состояния вразнобой, и живой порт 22 то есть среди
+        слушающих, то нет - SSHD и RESTORE кончались «порт 22 не слушается» при
+        работающем sshd. Несколько попыток: после перезапуска служба поднимается
+        не сразу. Двойник - в Install-OpenSSH.ps1: тот сценарий самостоятельный.
+    #>
+    param([int]$Tries = 5)
+    for ($try = 1; $try -le $Tries; $try++) {
+        foreach ($address in @([System.Net.IPAddress]::Loopback, [System.Net.IPAddress]::IPv6Loopback)) {
+            $client = New-Object System.Net.Sockets.TcpClient ($address.AddressFamily)
+            try {
+                if ($client.ConnectAsync($address, 22).Wait(2000)) {
+                    $stream = $client.GetStream()
+                    $stream.ReadTimeout = 3000
+                    $buffer = New-Object byte[] 64
+                    $read = $stream.Read($buffer, 0, $buffer.Length)
+                    if ([System.Text.Encoding]::ASCII.GetString($buffer, 0, $read).StartsWith('SSH-')) { return $true }
+                }
+            } catch {
+            } finally {
+                $client.Close()
+            }
+        }
+        if ($try -lt $Tries) { Start-Sleep 1 }
+    }
+    return $false
+}
+
 # Свои сети: домашние подсети за домашний роутер, плечи SECOND VPS и сеть WG-сервера
 # роутера. Из них к машине ходят; всё остальное порт не увидит.
 $TrustedNets = @(
@@ -361,7 +392,7 @@ if ($Check) {
         }
     }
 
-    $listen = Get-NetTCPConnection -LocalPort 22 -State Listen -ErrorAction SilentlyContinue
+    $listen = Test-SshdAnswers
     Write-Line ("Порт 22: " + $(if ($listen) { 'слушается' } else { 'не слушается' })) `
         $(if ($listen) { 'Green' } else { 'Yellow' })
     Write-Host ""
@@ -531,7 +562,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # --- 5. Проверка -------------------------------------------------------------
 Start-Sleep 2
-$listen = Get-NetTCPConnection -LocalPort 22 -State Listen -ErrorAction SilentlyContinue
+$listen = Test-SshdAnswers
 Write-Host ""
 # Готовность заявляем только доказанную: без закрытых прав sshd молча не читает
 # файл ключей, без слушателя не принимает никого. Иначе код выхода ненулевой -

@@ -4,6 +4,7 @@
 
 **Contents**
 
+- [2.5.2 — 28 October 2026](#252--28-october-2026)
 - [2.5.1 — 27 October 2026](#251--27-october-2026)
 - [2.5.0 — 24 October 2026](#250--24-october-2026)
 - [2.4.1 — 23 October 2026](#241--23-october-2026)
@@ -63,6 +64,19 @@
 - [1.2.0 — 5 September 2026](#120--5-september-2026)
 - [1.1.0 — 5 September 2026](#110--5-september-2026)
 - [1.0.0 — 5 September 2026](#100--5-september-2026)
+
+## 2.5.2 — 28 October 2026
+
+**SSHD and RESTORE check port 22 by connecting.** sshd is ready when port 22 of this machine answers with `SSH-`, not when
+the Windows connection table says so: on Windows 11 26H2 that table returns states at random, and with sshd running the
+SSHD step and RESTORE MIRROR ended with "port 22 is not listening" (exit=1). Forwards for RDP, the web UI and SOCKS are
+checked the same way: the program takes a free port for a moment itself and knows a forward is up when it answers.
+
+**REVERSE SSH TUN opens no browser.** The channel tries a leg through cloudflared only with a Cloudflare Access sign-in;
+without one it skips that leg and holds on to the others. Sign in with RESTORE MIRROR or `cloudflared access login`.
+
+**The Audion logo in ABOUT.** ABOUT opens with the Audion logo of Audion Design: light letters in the dark themes, dark ones
+in the light theme.
 
 ## 2.5.1 — 27 October 2026
 

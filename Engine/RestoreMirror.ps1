@@ -113,6 +113,32 @@ function Test-AbkAccessToken {
     return ($LASTEXITCODE -eq 0)
 }
 
+function Get-AbkAccessLeg {
+    <#
+        The Cloudflare Access door of one ssh alias: @{ HostName; Cloudflared } when
+        its Host block goes through cloudflared access, $null otherwise. REVERSE SSH
+        TUN asks before every attempt: without a sign-in cloudflared opens a browser.
+    #>
+    param([Parameter(Mandatory)][string]$SshConfig, [Parameter(Mandatory)][string]$Alias)
+    if (-not (Test-Path -LiteralPath $SshConfig)) { return $null }
+    $inside = $false
+    $name = $Alias
+    $proxy = ''
+    foreach ($line in [IO.File]::ReadAllLines($SshConfig)) {
+        if ($line -match '^\s*(Host|Match)\s+(.*)$') {
+            if ($inside) { break }
+            $inside = ($Matches[1] -eq 'Host') -and (@($Matches[2].Trim() -split '\s+') -contains $Alias)
+            continue
+        }
+        if (-not $inside) { continue }
+        if ($line -match '^\s*HostName\s+(\S+)') { $name = $Matches[1] }
+        elseif ($line -match '^\s*ProxyCommand\s+"([^"]*cloudflared[^"]*)"') { $proxy = $Matches[1] }
+        elseif ($line -match '^\s*ProxyCommand\s+(\S*cloudflared\S*)') { $proxy = $Matches[1] }
+    }
+    if (-not $proxy) { return $null }
+    @{ HostName = $name; Cloudflared = $proxy }
+}
+
 function Invoke-AbkAccessLogins {
     <# Cloudflare Access sign-in for every cloudflared route; waits for the person. #>
     param([Parameter(Mandatory)][string]$Cloudflared, [Parameter(Mandatory)][string]$SshConfig, [switch]$NoPrompt)

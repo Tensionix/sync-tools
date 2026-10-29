@@ -169,7 +169,7 @@ Start-Sleep -Seconds 90
     # production bootstrap and OpenSSH from consulting the real SSH profile.
     if (Test-Path -LiteralPath $sshVersion) {
         $control.Handle.Process.Dispose(); $control.Handle=$null
-        foreach ($dependency in 'DataRoot.ps1','Secrets.ps1','Targets.ps1','KeyPair.ps1') {
+        foreach ($dependency in 'DataRoot.ps1','Secrets.ps1','Targets.ps1','KeyPair.ps1','RestoreMirror.ps1') {
             Copy-Item -LiteralPath (Join-Path $AppRoot ('Engine\' + $dependency)) -Destination (Join-Path $app 'Engine')
         }
         Copy-Item -LiteralPath (Join-Path $AppRoot 'Tunnel\RemoteDesktop\Setup-SshBeacon.ps1') -Destination $fixture

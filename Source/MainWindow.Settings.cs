@@ -447,6 +447,16 @@ public partial class MainWindow
         SettingsBody.Children.Clear();
         _into = null;
         Add(new TextBlock { Text = "ABOUT", FontWeight = FontWeight.SemiBold, FontSize = 16, Margin = new Thickness(0, 0, 0, 8) });
+        // The Audion logo of Audion Design: light letters on the dark themes, dark ones on the light theme.
+        var logo = new Image
+        {
+            Source = new Avalonia.Media.Imaging.Bitmap(Avalonia.Platform.AssetLoader.Open(new Uri(
+                "avares://AudionSyncTools/Assets/brand/" + (_settings.Look == "light" ? "Audion_Logo_Light_1600.png" : "Audion_Logo_Dark_1600.png")))),
+            Height = 56, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 10),
+        };
+        // a large picture shown small: the high-quality scaler keeps its lines clean
+        RenderOptions.SetBitmapInterpolationMode(logo, Avalonia.Media.Imaging.BitmapInterpolationMode.HighQuality);
+        Add(logo);
 
         var columns = new Grid { ColumnDefinitions = new ColumnDefinitions("*,16,*") };
         var left = new StackPanel { Spacing = 10 };

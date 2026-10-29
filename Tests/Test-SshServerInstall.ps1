@@ -4,9 +4,13 @@ $file=Join-Path $SourceRoot 'Tunnel\RemoteDesktop\Setup-SshServer.ps1'
 $source=[IO.File]::ReadAllText($file)
 $tokens=$null;$errors=$null
 $ast=[Management.Automation.Language.Parser]::ParseFile($file,[ref]$tokens,[ref]$errors)
-foreach($name in @('Test-Admin','Install-OpenSshFromGithub')){
+foreach($name in @('Test-Admin','Install-OpenSshFromGithub','Test-SshdAnswers')){
     $f=@($ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true))[0]
-    $replacement=if($name -eq 'Test-Admin'){'function Test-Admin { return $true }'}else{'function Install-OpenSshFromGithub { Record-Event "install-mock"; $script:ServicePresent=$true; return $true }'}
+    $replacement=switch($name){
+        'Test-Admin'{'function Test-Admin { return $true }'}
+        'Install-OpenSshFromGithub'{'function Install-OpenSshFromGithub { Record-Event "install-mock"; $script:ServicePresent=$true; return $true }'}
+        'Test-SshdAnswers'{'function Test-SshdAnswers { return ($scenario -ne ''no-listener'') }'}
+    }
     $source=$source.Replace($f.Extent.Text,$replacement)
 }
 $source=$source.Replace('$env:ProgramData','$FixtureProgramData')
@@ -33,7 +37,6 @@ function Get-NetFirewallRule { param($Name,$DisplayName,$ErrorAction) }
 function Disable-NetFirewallRule { param($ErrorAction) Record-Event 'disable-default-firewall-mock' }
 function Remove-NetFirewallRule { param($DisplayName) Record-Event 'remove-firewall-mock' }
 function New-NetFirewallRule { param($DisplayName,$Direction,$Protocol,$LocalPort,$Action,$Profile,$RemoteAddress) Record-Event 'new-firewall-mock' }
-function Get-NetTCPConnection { param($LocalPort,$State,$ErrorAction) if($scenario -ne 'no-listener'){[pscustomobject]@{LocalPort=22;State='Listen'}} }
 function Start-Sleep { param($Seconds,$Milliseconds) }
 function icacls { Record-Event 'icacls-mock'; if($scenario -eq 'acl-failure'){$global:LASTEXITCODE=5;'synthetic ACL denied'}else{$global:LASTEXITCODE=0;'synthetic ACL success'} }
 function Invoke-RestMethod { throw 'FORBIDDEN network' }
